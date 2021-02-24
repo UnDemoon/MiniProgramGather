@@ -65,5 +65,5 @@ class Ui_MainWindow(object):
         MainWindow.setWindowTitle(_translate("MainWindow", "微信小游戏采集"))
         self.Label_2.setText(_translate("MainWindow", "开始"))
         self.Label.setText(_translate("MainWindow", "结束"))
-        self.label.setText(_translate("MainWindow", "TextLabel"))
+        self.label.setText(_translate("MainWindow", "session"))
         self.pushButton.setText(_translate("MainWindow", "开始"))

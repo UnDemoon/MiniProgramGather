@@ -1,7 +1,7 @@
 '''
 Author: your name
 Date: 2021-02-23 10:02:01
-LastEditTime: 2021-02-24 10:07:56
+LastEditTime: 2021-02-24 15:52:51
 LastEditors: Please set LastEditors
 Description: In User Settings Edit
 FilePath: /MiniProgramGather/utils.py
@@ -85,10 +85,8 @@ def _subGet(url, para):
     res = {}
     try:
         r = requests.get(url, params=para, verify=False)
-        logFile(str(r.text))
         res = r.json()
     except BaseException as e:
-        print("EOOE")
         print(str(e))
     return res
 

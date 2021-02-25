@@ -1,10 +1,11 @@
 {
+    "//": "banner广告 收入、点击、曝光、点击率",
     "api_interface": "addWeixinAppAdvertisement",
     "field_name_list": [
-        "income",
-        "show_times",
-        "click_times",
-        "click_ratio"
+        "banner_income",
+        "banner_show_times",
+        "banner_click_times",
+        "banner_ratio"
     ],
     "request_data": {
         "need_app_info": true,
@@ -14,7 +15,13 @@
                 "size_type": 24,
                 "stat_type": 1000020,
                 "data_field_id": 3,
-                "filter_list": [],
+                "filter_list": [
+                    {
+                        "name": "banner广告",
+                        "field_id": 2,
+                        "value": "8040321819858439"
+                    }
+                ],
                 "time_period": {
                     "start_time": 1611590400,
                     "duration_seconds": 2592000
@@ -24,7 +31,13 @@
                 "size_type": 24,
                 "stat_type": 1000020,
                 "data_field_id": 6,
-                "filter_list": [],
+                "filter_list": [
+                    {
+                        "name": "banner广告",
+                        "field_id": 2,
+                        "value": "8040321819858439"
+                    }
+                ],
                 "time_period": {
                     "start_time": 1611590400,
                     "duration_seconds": 2592000
@@ -34,7 +47,13 @@
                 "size_type": 24,
                 "stat_type": 1000020,
                 "data_field_id": 5,
-                "filter_list": [],
+                "filter_list": [
+                    {
+                        "name": "banner广告",
+                        "field_id": 2,
+                        "value": "8040321819858439"
+                    }
+                ],
                 "time_period": {
                     "start_time": 1611590400,
                     "duration_seconds": 2592000
@@ -44,7 +63,13 @@
                 "size_type": 24,
                 "stat_type": 1000020,
                 "data_field_id": 8,
-                "filter_list": [],
+                "filter_list": [
+                    {
+                        "name": "banner广告",
+                        "field_id": 2,
+                        "value": "8040321819858439"
+                    }
+                ],
                 "time_period": {
                     "start_time": 1611590400,
                     "duration_seconds": 2592000

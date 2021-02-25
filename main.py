@@ -5,7 +5,7 @@
 @Autor: Demoon
 @Date: 1970-01-01 08:00:00
 LastEditors: Please set LastEditors
-LastEditTime: 2021-02-25 15:24:04
+LastEditTime: 2021-02-25 18:08:09
 '''
 #  基础模块
 import sys
@@ -93,13 +93,8 @@ class GatherThread(threading.Thread):
     def run(self):
         # api = Api()
         #   数据采集
-        gamedata = MPG(self.session_id, self.date_tuple, self.app_info)
-        #   step 1
-        # data = gamedata.advertisement()
-        # res = self.api.up('addWeixinAppAdvertisement', data)
-        #   step 2
-        data = gamedata.appData()
-        res = self.api.up('addWeixinAppData', data)
+        mpg = MPG(self.session_id, self.date_tuple, self.app_info, self.api)
+        mpg.appData()
 
 
 # if __name__ == '__main__':
@@ -116,7 +111,7 @@ class GatherThread(threading.Thread):
 
 if __name__ == '__main__':
     houyiApi = Api()
-    session = 'BgAAGSa9RO3bPTOg0ueDAB0Y-CzfSeHQyhBi5lrP4rcYIWU'
+    session = 'BgAAOZ7VdTGC1Lj1D8Gfdl2Xs5arxanYFAonOpWJhRVdLkU'
     dates = (QDate(2021, 2, 20), QDate(2021, 2, 25))
     #   处理appid与app_id数据
     app_infos = houyiApi.pageData('list_apps', None)

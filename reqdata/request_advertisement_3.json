@@ -1,0 +1,83 @@
+{
+    "//": "激励视频广告 收入、点击、曝光、点击率",
+    "api_interface": "addWeixinAppAdvertisement",
+    "field_name_list": [
+        "video_income",
+        "video_show_times",
+        "video_click_times",
+        "video_ratio"
+    ],
+    "request_data": {
+        "need_app_info": true,
+        "appid": "wx60ac686b4635c4ba",
+        "sequence_index_list": [
+            {
+                "size_type": 24,
+                "stat_type": 1000020,
+                "data_field_id": 3,
+                "filter_list": [
+                    {
+                        "name": "激励视频广告",
+                        "field_id": 2,
+                        "value": "1030436212907001"
+                    }
+                ],
+                "time_period": {
+                    "start_time": 1611590400,
+                    "duration_seconds": 2592000
+                }
+            },
+            {
+                "size_type": 24,
+                "stat_type": 1000020,
+                "data_field_id": 6,
+                "filter_list": [
+                    {
+                        "name": "激励视频广告",
+                        "field_id": 2,
+                        "value": "1030436212907001"
+                    }
+                ],
+                "time_period": {
+                    "start_time": 1611590400,
+                    "duration_seconds": 2592000
+                }
+            },
+            {
+                "size_type": 24,
+                "stat_type": 1000020,
+                "data_field_id": 5,
+                "filter_list": [
+                    {
+                        "name": "激励视频广告",
+                        "field_id": 2,
+                        "value": "1030436212907001"
+                    }
+                ],
+                "time_period": {
+                    "start_time": 1611590400,
+                    "duration_seconds": 2592000
+                }
+            },
+            {
+                "size_type": 24,
+                "stat_type": 1000020,
+                "data_field_id": 8,
+                "filter_list": [
+                    {
+                        "name": "激励视频广告",
+                        "field_id": 2,
+                        "value": "1030436212907001"
+                    }
+                ],
+                "time_period": {
+                    "start_time": 1611590400,
+                    "duration_seconds": 2592000
+                }
+            }
+        ],
+        "group_index_list": [],
+        "rank_index_list": [],
+        "version": 2
+    }
+}

@@ -5,12 +5,13 @@
 @Autor: Demoon
 @Date: 1970-01-01 08:00:00
 LastEditors: Please set LastEditors
-LastEditTime: 2021-02-24 17:19:29
+LastEditTime: 2021-02-25 15:24:04
 '''
 #  基础模块
 import sys
 import time
 import logging
+import threading
 #   qt5
 from PyQt5 import QtWidgets
 from PyQt5.Qt import QThread
@@ -53,6 +54,13 @@ class MyApp(QtWidgets.QMainWindow, Ui):
         self.DateEdit.setCalendarPopup(True)
         self.DateEdit_2.setDate(today.addDays(-5))
         self.DateEdit_2.setEnabled(False)
+        #   处理appid与app_id数据
+        app_infos = self.api.pageData('list_apps', None)
+        app_list = app_infos.get('Result', {}).get('List', [])
+        app_dict = map(lambda x: {
+            str(x['appid']): str(x['id']),
+            }, app_list)
+        myTools.writeToFile('appinfos.tmp', str(list(app_dict)))
 
     #   时间处理
     def _timeInit(self):
@@ -61,12 +69,11 @@ class MyApp(QtWidgets.QMainWindow, Ui):
 
     #   按钮触发
     def start_run(self):
-        session = 'BgAAV20tPNuDVJ0HrO3PXbUmBr7Etzv-y3LNeHsoXDNoJ7o'
+        session = 'BgAAIS2RR62FKL7-tzSc-5swJfvK7Inb62nAWuL5JvyqPVg'
         dates = (self.DateEdit_2.date(), self.DateEdit.date())
         gl = MPGModel.listGames(session)
-        houyi = Api()
         for g in gl:
-            gather = GatherThread(session, dates, g['appid'], houyi)
+            gather = GatherThread(session, dates, g['appid'], self.api)
             self.thread_pools.append(gather)
             # self.threadPools.append(gather)
             # gather.sig.completed.connect(self._completedListener)
@@ -75,29 +82,56 @@ class MyApp(QtWidgets.QMainWindow, Ui):
 
 
 # 采集线程
-class GatherThread(QThread):
-    def __init__(self, session_id: str, date_tuple: tuple, appid: str, api: object):
+class GatherThread(threading.Thread):
+    def __init__(self, session_id: str, date_tuple: tuple, app_info: dict, api: object):
         super().__init__()
         self.session_id = session_id
         self.date_tuple = date_tuple
-        self.appid = appid
+        self.app_info = app_info
         self.api = api
 
     def run(self):
         # api = Api()
         #   数据采集
-        gamedata = MPG(self.session_id, self.date_tuple, self.appid)
-        data = gamedata.advertisement()
-        res = self.api.up('addWeixinAppAdvertisement', data)
+        gamedata = MPG(self.session_id, self.date_tuple, self.app_info)
+        #   step 1
+        # data = gamedata.advertisement()
+        # res = self.api.up('addWeixinAppAdvertisement', data)
+        #   step 2
+        data = gamedata.appData()
+        res = self.api.up('addWeixinAppData', data)
+
+
+# if __name__ == '__main__':
+#     # 定义为全局变量，方便其他模块使用
+#     global RUN_EVN
+#     try:
+#         RUN_EVN = sys.argv[1]
+#     except Exception:
+#         pass
+#     app = QtWidgets.QApplication(sys.argv)
+#     window = MyApp()
+#     window.show()
+#     sys.exit(app.exec_())
 
 if __name__ == '__main__':
-    # 定义为全局变量，方便其他模块使用
-    global RUN_EVN
-    try:
-        RUN_EVN = sys.argv[1]
-    except Exception:
-        pass
-    app = QtWidgets.QApplication(sys.argv)
-    window = MyApp()
-    window.show()
-    sys.exit(app.exec_())
+    houyiApi = Api()
+    session = 'BgAAGSa9RO3bPTOg0ueDAB0Y-CzfSeHQyhBi5lrP4rcYIWU'
+    dates = (QDate(2021, 2, 20), QDate(2021, 2, 25))
+    #   处理appid与app_id数据
+    app_infos = houyiApi.pageData('list_apps', None)
+    app_list = app_infos.get('Result', {}).get('List', [])
+    app_dict = {}
+    for app in app_list:
+        app_dict[app['appid']] = app['id']
+    #   抓取数据
+    gl = MPGModel.listGames(session)
+    if len(app_dict) > 0 and len(gl) > 0:
+        for g in gl:
+            app_id = app_dict.get(g['appid'])
+            appid = g.get('appid')
+            if not app_id or not appid:
+                break
+            app_info = {'appid': appid, 'app_id': app_id}
+            gather = GatherThread(session, dates, app_info, houyiApi)
+            gather.start()

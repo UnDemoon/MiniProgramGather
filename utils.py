@@ -1,7 +1,7 @@
 '''
 Author: your name
 Date: 2021-02-23 10:02:01
-LastEditTime: 2021-02-24 15:52:51
+LastEditTime: 2021-02-25 14:07:34
 LastEditors: Please set LastEditors
 Description: In User Settings Edit
 FilePath: /MiniProgramGather/utils.py
@@ -71,12 +71,14 @@ def urlParam(url: str):
 
 #   _get 方法
 def moreGet(url, para, time: int = 3):
-    res = _subGet(url, para)
-    temp_time = time - 1
-    while (res.get('errcode') != 0 and temp_time > 0):
+    temp_time = time
+    res = None
+    while temp_time >= 0:
         randomSleep()
         res = _subGet(url, para)
         temp_time -= 1
+        if res.get('errcode') == 0:
+            break
     return res
 
 
@@ -102,3 +104,9 @@ def logFile(strings: str, file='_debug-log.log'):
         f.write('\n')
         f.write(strings)
         f.write('\n')
+
+
+#   写入文件
+def writeToFile(file_path: str, data_str: str):
+    with open(file_path, 'a+') as f:
+        f.write(data_str)

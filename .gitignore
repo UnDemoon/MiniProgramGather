@@ -19,3 +19,4 @@ dist/
 *.zip
 *.db
 *-bak
+*.tmp

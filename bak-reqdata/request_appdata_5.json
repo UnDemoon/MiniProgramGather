@@ -1,0 +1,74 @@
+{
+    "//": "分享数据 没有用的数据 就先不采了吧",
+    "api_interface": "addWeixinAppData",
+    "field_name_list": [
+        "share_user",
+        "share_times",
+        "share_ratio"
+    ],
+    "request_data": {
+        "need_app_info": true,
+        "appid": "wx544d1855bb3963d5",
+        "sequence_index_list": [
+            {
+                "size_type": 24,
+                "stat_type": 1000028,
+                "data_field_id": 4,
+                "filter_list": [
+                    {
+                        "name": "全部平台",
+                        "field_id": 6,
+                        "value": "-9999"
+                    }
+                ],
+                "time_period": {
+                    "start_time": 1611504000,
+                    "duration_seconds": 2764800
+                }
+            },
+            {
+                "size_type": 24,
+                "stat_type": 1000156,
+                "data_field_id": 6,
+                "filter_list": [
+                    {
+                        "field_id": 4,
+                        "value": "1"
+                    },
+                    {
+                        "name": "全部平台",
+                        "field_id": 3,
+                        "value": "-9999"
+                    }
+                ],
+                "time_period": {
+                    "start_time": 1611504000,
+                    "duration_seconds": 2764800
+                }
+            },
+            {
+                "size_type": 24,
+                "stat_type": 1000156,
+                "data_field_id": 6,
+                "filter_list": [
+                    {
+                        "field_id": 4,
+                        "value": "3"
+                    },
+                    {
+                        "name": "全部平台",
+                        "field_id": 3,
+                        "value": "-9999"
+                    }
+                ],
+                "time_period": {
+                    "start_time": 1611504000,
+                    "duration_seconds": 2764800
+                }
+            }
+        ],
+        "group_index_list": [],
+        "rank_index_list": [],
+        "version": 2
+    }
+}

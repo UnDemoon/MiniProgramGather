@@ -5,7 +5,7 @@
 @Autor: Demoon
 @Date: 1970-01-01 08:00:00
 LastEditors: Please set LastEditors
-LastEditTime: 2021-02-25 18:08:09
+LastEditTime: 2021-02-26 10:20:22
 '''
 #  基础模块
 import sys
@@ -111,7 +111,7 @@ class GatherThread(threading.Thread):
 
 if __name__ == '__main__':
     houyiApi = Api()
-    session = 'BgAAOZ7VdTGC1Lj1D8Gfdl2Xs5arxanYFAonOpWJhRVdLkU'
+    session = 'BgAA3b-6148HXgUaAwFmMLdsZDdK66EsPGBCO36hjKKEKkw'
     dates = (QDate(2021, 2, 20), QDate(2021, 2, 25))
     #   处理appid与app_id数据
     app_infos = houyiApi.pageData('list_apps', None)

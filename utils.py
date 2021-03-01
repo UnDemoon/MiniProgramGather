@@ -1,7 +1,7 @@
 '''
 Author: your name
 Date: 2021-02-23 10:02:01
-LastEditTime: 2021-02-25 14:07:34
+LastEditTime: 2021-03-01 15:28:25
 LastEditors: Please set LastEditors
 Description: In User Settings Edit
 FilePath: /MiniProgramGather/utils.py
@@ -38,24 +38,25 @@ def timeLag(daylag: int = 5, timetype: str = 'uix'):  # 日期间隔  类型 uix
 
 
 #   生成最近n天日期
+#   dateAry (datetime, datetime)
 def dateList(dateAry: tuple):
     start, end = dateAry
     res = []
     cur_day = start
-    res.append(cur_day.toString('yyyy-MM-dd'))
-    while cur_day < end:
-        cur_day = cur_day.addDays(+1)
-        res.append(cur_day.toString('yyyy-MM-dd'))
+    while True:
+        # res.append(cur_day)
+        res.append(int(cur_day.timestamp()))
+        cur_day = cur_day + datetime.timedelta(days=1)
+        if cur_day >= end:
+            break
     return res
 
 
 #   QDate 转时间戳
+#   dateAry (datetime, datetime)
 def dateToStamps(dateAry: tuple):
     start, end = dateAry
-    qtime = QTime(0, 0)
-    start = QDateTime(start, qtime)
-    end = QDateTime(end, qtime)
-    return (start.toTime_t(), end.toTime_t())
+    return (int(start.timestamp()), int(end.timestamp()))
 
 
 #   时间戳转 Qtime

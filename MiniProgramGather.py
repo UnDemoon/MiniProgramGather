@@ -1,7 +1,7 @@
 '''
 Author: Demoon
 Date: 2021-02-23 10:06:02
-LastEditTime: 2021-02-25 17:56:11
+LastEditTime: 2021-03-01 17:10:52
 LastEditors: Please set LastEditors
 Description: 微信小游戏数据助手爬取类
 FilePath: /MiniProgramGather/MiniProgram.py
@@ -62,8 +62,14 @@ class MiniProgramGather:
         self.app_info = app_info
         self.api = houyiApi
 
-    #   获取wx_weixin_app_data表数据
-    def appData(self):
+    #   运行采集
+    #   遍历 reqdata 下配置文件依次获取数据并发送
+    #   仅适用于无依赖接口
+    def runGatherer(self):
+        self.channelData()
+        return True
+        start_uix, end_uix = mytools.dateToStamps(self.date_tuple)
+        duration = end_uix - start_uix
         url = "https://game.weixin.qq.com/cgi-bin/gamewxagbdatawap/getwxagstat"
         path = "./reqdata/"
         for root, dirs, files in os.walk(path):
@@ -71,21 +77,55 @@ class MiniProgramGather:
                 file_path = os.path.join(root, file)
                 with open(file_path, 'r', encoding='utf-8') as f:
                     req_conf = json.load(f)
-                    reqdata = self._buildReqdata(req_conf['request_data'])
+                    reqdata = self._buildReqdata(req_conf['request_data'], (start_uix, duration))
                     reqs = warpGet(url, self.session_id, reqdata)
                     data = self._formatRes(reqs, req_conf['field_name_list'])
                     self.api.up(req_conf['api_interface'], data)
 
+    #   特殊处理获取渠道数据接口
+    def channelData(self):
+        url = "https://game.weixin.qq.com/cgi-bin/gamewxagbdatawap/getwxagstat"
+        dayuix_list = mytools.dateList(self.date_tuple)
+        duration = 24 * 60 * 60  # 86400
+        #   获取自定义渠道
+        #   该接口 duration_seconds 只支持 86400
+        request_data = {
+            "need_app_info": True,
+            "appid": "wx544d1855bb3963d5",
+            "sequence_index_list": [],
+            "group_index_list": [{
+                "size_type": 24,
+                "requestType": "group",
+                "time_period": {
+                    "start_time": 1614441600,
+                    "duration_seconds": 86400
+                },
+                "group_id": 4,
+                "stat_type": 1000088,
+                "data_field_id": 6
+            }],
+            "rank_index_list": [],
+            "version": 2
+        }
+        for suix in dayuix_list:
+            reqdata = self._buildReqdata(request_data, (suix, duration))
+            reqs = warpGet(url, self.session_id, reqdata)
+            data = self._formatResChannelGroup(reqs)
+            self.api.up('addWeixinChannelGroup', data)
+
     #   处理请求数据
-    def _buildReqdata(self, request_data: dict):
-        start_uix, end_uix = mytools.dateToStamps(self.date_tuple)
-        duration = end_uix - start_uix
+    def _buildReqdata(self, request_data: dict, time_period: tuple):
+        start_uix, duration = time_period
         request_data['appid'] = self.app_info['appid']
-        for sequence in request_data['sequence_index_list']:
-            sequence['time_period'] = {
-                "start_time": start_uix,
-                "duration_seconds": duration
-                }
+        index_list = ['sequence_index_list', 'group_index_list', 'rank_index_list']
+        for idx_name in index_list:
+            if request_data.get(idx_name, None):
+                for sequence in request_data[idx_name]:
+                    if sequence.get('time_period', None):
+                        sequence['time_period'] = {
+                            "start_time": start_uix,
+                            "duration_seconds": duration
+                            }
         return request_data
 
     #   处理返回数据
@@ -102,4 +142,19 @@ class MiniProgramGather:
                     temp['day'] = item['label']
                     temp['app_id'] = self.app_info['app_id']
                     res.append(temp)
+        return res
+
+    #   处理渠道分组数据
+    def _formatResChannelGroup(self, reqs_json_dict: dict):
+        res = []
+        group_data_list = reqs_json_dict.get('data', {}).get('group_data_list')
+        if group_data_list:
+            point_list = group_data_list[0]['point_list']
+            for item in point_list:
+                temp = {}
+                temp['req_value'] = item['label_value']
+                temp['name'] = item['label']
+                temp['group_id'] = 0  # 这个字段修改了后台，用不上了
+                temp['app_id'] = self.app_info['app_id']
+                res.append(temp)
         return res

@@ -1,7 +1,7 @@
 '''
 Author: Demoon
 Date: 2021-02-23 10:06:02
-LastEditTime: 2021-03-01 17:10:52
+LastEditTime: 2021-03-02 18:17:48
 LastEditors: Please set LastEditors
 Description: 微信小游戏数据助手爬取类
 FilePath: /MiniProgramGather/MiniProgram.py
@@ -10,9 +10,8 @@ import requests
 import json
 import time
 import os
-from urllib.request import quote
 import utils as mytools
-from PyQt5.QtCore import QDate, Qt, QDateTime
+import logging
 # import datetime
 
 
@@ -41,14 +40,6 @@ def listGames(session_id):
         if get_data.get('has_next'):
             #   请求数据
             data['offset'] = get_data.get('next_offset')
-            res = warpGet(url, session_id, data)
-            #   处理数据
-            get_data = res.get('data', {})
-            game_list += map(
-                lambda x: {
-                    "appid": x['appid'],
-                    "appname": x['appname']
-                }, get_data.get('app_list', []))
         else:
             break
     return game_list
@@ -56,11 +47,13 @@ def listGames(session_id):
 
 #   单个游戏采集类
 class MiniProgramGather:
-    def __init__(self, session_id: str, dates: tuple, app_info: dict, houyiApi: object):
+    def __init__(self, session_id: str, dates: tuple, app_info: dict,
+                 houyiApi: object, mydb: object):
         self.session_id = session_id
         self.date_tuple = dates
         self.app_info = app_info
         self.api = houyiApi
+        self.db = mydb
 
     #   运行采集
     #   遍历 reqdata 下配置文件依次获取数据并发送
@@ -77,7 +70,8 @@ class MiniProgramGather:
                 file_path = os.path.join(root, file)
                 with open(file_path, 'r', encoding='utf-8') as f:
                     req_conf = json.load(f)
-                    reqdata = self._buildReqdata(req_conf['request_data'], (start_uix, duration))
+                    reqdata = self._buildReqdata(req_conf['request_data'],
+                                                 (start_uix, duration))
                     reqs = warpGet(url, self.session_id, reqdata)
                     data = self._formatRes(reqs, req_conf['field_name_list'])
                     self.api.up(req_conf['api_interface'], data)
@@ -90,8 +84,10 @@ class MiniProgramGather:
         #   获取自定义渠道
         #   该接口 duration_seconds 只支持 86400
         request_data = {
-            "need_app_info": True,
-            "appid": "wx544d1855bb3963d5",
+            "need_app_info":
+            True,
+            "appid":
+            "wx544d1855bb3963d5",
             "sequence_index_list": [],
             "group_index_list": [{
                 "size_type": 24,
@@ -105,19 +101,80 @@ class MiniProgramGather:
                 "data_field_id": 6
             }],
             "rank_index_list": [],
-            "version": 2
+            "version":
+            2
         }
         for suix in dayuix_list:
             reqdata = self._buildReqdata(request_data, (suix, duration))
             reqs = warpGet(url, self.session_id, reqdata)
             data = self._formatResChannelGroup(reqs)
-            self.api.up('addWeixinChannelGroup', data)
+            self.saveToDb('channel_group', data)
+        #   获取该 app_id 下分组
+        group_list = self.db.findAll("SELECT * FROM channel_group WHERE app_id={0}".format(self.app_info['app_id']))
+        for group in group_list:
+            self._channel(group)
+            #   获取该 分组下渠道
+            channel_list = self.db.findAll("SELECT * FROM channel WHERE app_id={0} AND group_id={1}".format(self.app_info['app_id'], group[0]))
+            for channel in channel_list:
+                self._channelData(channel)
+
+    #   获取渠道
+    def _channel(self, group_info: tuple):
+        url = "https://game.weixin.qq.com/cgi-bin/gamewxagbdatawap/getwxagstat"
+        start_uix, end_uix = mytools.dateToStamps(self.date_tuple)
+        end_uix = end_uix - 24 * 60 * 60
+        duration = 24 * 60 * 60  # 86400
+        filter_list = [{
+            "name": group_info[2],
+            "field_id": 4,
+            "value": group_info[1]
+        }]
+        request_data = {
+            "need_app_info": True,
+            "appid": "wxf846ea330ed135d7",
+            "rank_index_list": [{
+                "size_type": 24,
+                "main_index": {
+                    "name": "来源",
+                    "stat_type": 1000088,
+                    "size_type": 24,
+                    "data_field_id": 6,
+                    "key_field_id": 5,
+                    "filter_list": filter_list
+                },
+                "join_index_list": [{
+                    "name": "来源",
+                    "stat_type": 1000088,
+                    "size_type": 24,
+                    "data_field_id": 6,
+                    "key_field_id": 5,
+                    "filter_list": filter_list
+                }],
+                "cur_page": 0,
+                "per_page": 20,
+                "time_period": {
+                    "start_time": 1614528000,
+                    "duration_seconds": 86400
+                }
+            }],
+            "version": 2
+        }
+        reqdata = self._buildReqdata(request_data, (end_uix, duration))
+        reqs = warpGet(url, self.session_id, reqdata)
+        data = self._formatResChannel(reqs)
+        self.saveToDb('channel', data)
+
+    #   获取渠道数据
+    def _channelData(self, channel_info: tuple):
+        pass
 
     #   处理请求数据
     def _buildReqdata(self, request_data: dict, time_period: tuple):
         start_uix, duration = time_period
         request_data['appid'] = self.app_info['appid']
-        index_list = ['sequence_index_list', 'group_index_list', 'rank_index_list']
+        index_list = [
+            'sequence_index_list', 'group_index_list', 'rank_index_list'
+        ]
         for idx_name in index_list:
             if request_data.get(idx_name, None):
                 for sequence in request_data[idx_name]:
@@ -125,7 +182,7 @@ class MiniProgramGather:
                         sequence['time_period'] = {
                             "start_time": start_uix,
                             "duration_seconds": duration
-                            }
+                        }
         return request_data
 
     #   处理返回数据
@@ -147,14 +204,62 @@ class MiniProgramGather:
     #   处理渠道分组数据
     def _formatResChannelGroup(self, reqs_json_dict: dict):
         res = []
-        group_data_list = reqs_json_dict.get('data', {}).get('group_data_list')
-        if group_data_list:
+        group_data_list = reqs_json_dict.get('data', {}).get('group_data_list', [])
+        if len(group_data_list) > 0:
             point_list = group_data_list[0]['point_list']
             for item in point_list:
-                temp = {}
-                temp['req_value'] = item['label_value']
-                temp['name'] = item['label']
-                temp['group_id'] = 0  # 这个字段修改了后台，用不上了
-                temp['app_id'] = self.app_info['app_id']
+                # temp = {}
+                # temp['req_value'] = item['label_value']
+                # temp['name'] = item['label']
+                # temp['group_id'] = 0  # 这个字段修改了后台，用不上了
+                # temp['app_id'] = self.app_info['app_id']
+                temp = (item['label_value'], item['label'],
+                        self.app_info['app_id'])
                 res.append(temp)
         return res
+
+    #   处理渠道数据
+    def _formatResChannel(self, reqs_json_dict: dict):
+        res = []
+        rank_data_list = reqs_json_dict.get('data', {}).get('rank_data_list', [])
+        if len(rank_data_list) > 0:
+            stat_list = rank_data_list[0]['stat_list']
+            filter_list = rank_data_list[0].get('index', {}).get('main_index', {}).get('filter_list', [])
+            group_req_value = filter_list[0].get('value') if len(filter_list) > 0 else ""
+            for item in stat_list:
+                # temp = {}
+                # temp['req_value'] = item['label_value']
+                # temp['name'] = item['label']
+                # temp['group_id'] = 0  # 这个字段修改了后台，用不上了
+                # temp['app_id'] = self.app_info['app_id']
+                temp = (self.app_info['app_id'], item['key_field_value'], item['key_field_label'], group_req_value)
+                res.append(temp)
+        return res
+
+    #   数据存储
+    def saveToDb(self, tbl_name: str, data: list):
+        filter_data = []
+        if tbl_name == 'channel_group':
+            i = 0
+            while i < len(data):
+                item = data[i]
+                find_sql = "SELECT * FROM channel_group WHERE req_value='{0}' AND name='{1}' AND app_id={2}".format(
+                    item[0], item[1], item[2])
+                if not self.db.find(find_sql):
+                    filter_data.append(item)
+                i += 1
+        elif tbl_name == 'channel':
+            i = 0
+            while i < len(data):
+                item = data[i]
+                find_sql = "SELECT * FROM channel WHERE app_id={0} AND out_channel_id='{1}' AND name='{2}'".format(
+                    item[0], item[1], item[2])
+                if not self.db.find(find_sql):
+                    find_sql = "SELECT * FROM channel_group WHERE app_id={0} AND req_value='{1}'".format(item[0], item[3])
+                    group = self.db.find(find_sql)
+                    if group:
+                        filter_data.append((item[0], item[1], item[2], group[0], group[2]))
+                    else:
+                        logging.error("Not find group.Info:{0}".format(str(item)))
+                i += 1
+        self.db.save(tbl_name, filter_data)

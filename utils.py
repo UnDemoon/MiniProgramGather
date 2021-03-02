@@ -1,7 +1,7 @@
 '''
 Author: your name
 Date: 2021-02-23 10:02:01
-LastEditTime: 2021-03-01 15:28:25
+LastEditTime: 2021-03-02 15:35:20
 LastEditors: Please set LastEditors
 Description: In User Settings Edit
 FilePath: /MiniProgramGather/utils.py
@@ -94,7 +94,7 @@ def _subGet(url, para):
     return res
 
 
-def logFile(strings: str, file='_debug-log.log'):
+def logFile(strings: str, file='_ctm_debug-log.log'):
     """
     字符串写入文件
     """

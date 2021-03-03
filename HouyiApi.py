@@ -4,7 +4,7 @@
 @Autor: Demoon
 @Date: 1970-01-01 08:00:00
 LastEditors: Please set LastEditors
-LastEditTime: 2021-03-01 16:42:34
+LastEditTime: 2021-03-03 14:54:41
 '''
 import requests
 import json
@@ -32,6 +32,8 @@ class HouyiApi:
             'addWeixinAppAdvertisement': self.host + '/api/WeixinData/addWeixinAppAdvertisement.html',
             'addWeixinAppData': self.host + '/api/WeixinData/addWeixinAppData.html',
             'addWeixinChannelGroup': self.host + '/api/WeixinData/addWeixinChannelGroup.html',
+            'addWeixinChannel': self.host + '/api/WeixinData/addWeixinChannel.html',
+            'addWeixinChannelData': self.host + '/api/WeixinData/addWeixinChannelData.html',
         }
         self.token = self._getToken(account, pwd)
 

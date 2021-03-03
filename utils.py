@@ -1,7 +1,7 @@
 '''
 Author: your name
 Date: 2021-02-23 10:02:01
-LastEditTime: 2021-03-02 15:35:20
+LastEditTime: 2021-03-03 14:51:48
 LastEditors: Please set LastEditors
 Description: In User Settings Edit
 FilePath: /MiniProgramGather/utils.py
@@ -111,3 +111,8 @@ def logFile(strings: str, file='_ctm_debug-log.log'):
 def writeToFile(file_path: str, data_str: str):
     with open(file_path, 'a+') as f:
         f.write(data_str)
+
+
+if __name__ == '__main__':
+    a = ['a', 'b', 'c']
+    print(a[3%len(a)])

@@ -5,7 +5,7 @@
 @Autor: Demoon
 @Date: 1970-01-01 08:00:00
 LastEditors: Please set LastEditors
-LastEditTime: 2021-03-02 17:07:39
+LastEditTime: 2021-03-03 17:35:24
 '''
 #  基础模块
 import sys
@@ -58,7 +58,7 @@ class GatherThread(threading.Thread):
 #     sys.exit(app.exec_())
 
 if __name__ == '__main__':
-    session = 'BgAAq1HiPPJPIoH096jPQH3F3Nj9XyeEebWaxwBMeo3KbWY'
+    session = 'BgAAda6OLAOPn56gwd5WwnCRP8Jlxp3zSd2NR5iMqRSFC1I'
     date_today = datetime.date.today()
     dates = (datetime.datetime(2021, 2, 25, 0, 0, 0), datetime.datetime(date_today.year, date_today.month, date_today.day, 0, 0, 0))
     #   线程池

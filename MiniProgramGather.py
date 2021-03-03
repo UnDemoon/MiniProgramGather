@@ -1,7 +1,7 @@
 '''
 Author: Demoon
 Date: 2021-02-23 10:06:02
-LastEditTime: 2021-03-02 18:17:48
+LastEditTime: 2021-03-03 17:34:32
 LastEditors: Please set LastEditors
 Description: 微信小游戏数据助手爬取类
 FilePath: /MiniProgramGather/MiniProgram.py
@@ -32,8 +32,7 @@ def listGames(session_id):
         res = warpGet(url, session_id, data)
         #   处理数据
         get_data = res.get('data', {})
-        game_list += map(
-            lambda x: {
+        game_list += map(lambda x: {
                 "appid": x['appid'],
                 "appname": x['appname']
             }, get_data.get('app_list', []))
@@ -59,8 +58,7 @@ class MiniProgramGather:
     #   遍历 reqdata 下配置文件依次获取数据并发送
     #   仅适用于无依赖接口
     def runGatherer(self):
-        self.channelData()
-        return True
+        #   基础采集
         start_uix, end_uix = mytools.dateToStamps(self.date_tuple)
         duration = end_uix - start_uix
         url = "https://game.weixin.qq.com/cgi-bin/gamewxagbdatawap/getwxagstat"
@@ -70,11 +68,13 @@ class MiniProgramGather:
                 file_path = os.path.join(root, file)
                 with open(file_path, 'r', encoding='utf-8') as f:
                     req_conf = json.load(f)
-                    reqdata = self._buildReqdata(req_conf['request_data'],
-                                                 (start_uix, duration))
+                    reqdata = self._buildReqdata(req_conf['request_data'], (start_uix, duration))
                     reqs = warpGet(url, self.session_id, reqdata)
                     data = self._formatRes(reqs, req_conf['field_name_list'])
                     self.api.up(req_conf['api_interface'], data)
+        #   渠道相关特殊采集
+        self.channelData()
+        self._upChannel()    # 上传渠道 渠道分组
 
     #   特殊处理获取渠道数据接口
     def channelData(self):
@@ -84,10 +84,8 @@ class MiniProgramGather:
         #   获取自定义渠道
         #   该接口 duration_seconds 只支持 86400
         request_data = {
-            "need_app_info":
-            True,
-            "appid":
-            "wx544d1855bb3963d5",
+            "need_app_info": False,
+            "appid": "wx544d1855bb3963d5",
             "sequence_index_list": [],
             "group_index_list": [{
                 "size_type": 24,
@@ -101,8 +99,7 @@ class MiniProgramGather:
                 "data_field_id": 6
             }],
             "rank_index_list": [],
-            "version":
-            2
+            "version": 2
         }
         for suix in dayuix_list:
             reqdata = self._buildReqdata(request_data, (suix, duration))
@@ -113,24 +110,22 @@ class MiniProgramGather:
         group_list = self.db.findAll("SELECT * FROM channel_group WHERE app_id={0}".format(self.app_info['app_id']))
         for group in group_list:
             self._channel(group)
-            #   获取该 分组下渠道
+        #   获取该 分组下渠道
+        for group in group_list:
             channel_list = self.db.findAll("SELECT * FROM channel WHERE app_id={0} AND group_id={1}".format(self.app_info['app_id'], group[0]))
-            for channel in channel_list:
-                self._channelData(channel)
+            if len(channel_list) > 0:
+                self._channelData(channel_list, group)
 
     #   获取渠道
     def _channel(self, group_info: tuple):
-        url = "https://game.weixin.qq.com/cgi-bin/gamewxagbdatawap/getwxagstat"
-        start_uix, end_uix = mytools.dateToStamps(self.date_tuple)
-        end_uix = end_uix - 24 * 60 * 60
-        duration = 24 * 60 * 60  # 86400
         filter_list = [{
             "name": group_info[2],
             "field_id": 4,
             "value": group_info[1]
         }]
-        request_data = {
-            "need_app_info": True,
+        #   活跃渠道相关配置
+        request_data_act = {
+            "need_app_info": False,
             "appid": "wxf846ea330ed135d7",
             "rank_index_list": [{
                 "size_type": 24,
@@ -159,14 +154,148 @@ class MiniProgramGather:
             }],
             "version": 2
         }
-        reqdata = self._buildReqdata(request_data, (end_uix, duration))
-        reqs = warpGet(url, self.session_id, reqdata)
-        data = self._formatResChannel(reqs)
+        #   注册渠道相关配置
+        request_data_reg = {
+                "need_app_info": False,
+                "appid": "wxf846ea330ed135d7",
+                "rank_index_list": [
+                    {
+                        "size_type": 24,
+                        "main_index": {
+                            "name": "来源",
+                            "stat_type": 1000091,
+                            "data_field_id": 6,
+                            "size_type": 24,
+                            "key_field_id": 5,
+                            "filter_list": filter_list
+                        },
+                        "join_index_list": [
+                            {
+                                "name": "来源",
+                                "stat_type": 1000091,
+                                "data_field_id": 6,
+                                "size_type": 24,
+                                "key_field_id": 5,
+                                "filter_list": filter_list
+                            }
+                        ],
+                        "cur_page": 0,
+                        "per_page": 20,
+                        "time_period": {
+                            "start_time": 1614614400,
+                            "duration_seconds": 86400
+                        }
+                    }
+                ],
+                "version": 2
+            }
+        self._channelSub(request_data_act)
+        self._channelSub(request_data_reg)
+
+    #   _channel 的子程序 因为有活跃和注册区分
+    def _channelSub(self, request_data: dict):
+        #   变量处理
+        url = "https://game.weixin.qq.com/cgi-bin/gamewxagbdatawap/getwxagstat"
+        start_uix, end_uix = mytools.dateToStamps(self.date_tuple)
+        end_uix = end_uix - 24 * 60 * 60
+        duration = 24 * 60 * 60  # 86400
+        data = []
+        #   请求阶段
+        while True:
+            reqdata = self._buildReqdata(request_data, (end_uix, duration))
+            reqs = warpGet(url, self.session_id, reqdata)
+            next_page = reqs.get('data', {}).get('rank_data_list', [{}])[0].get("next_page")
+            data += self._formatResChannel(reqs)
+            if next_page:
+                request_data['rank_index_list'][0]['cur_page'] = next_page
+            else:
+                break
         self.saveToDb('channel', data)
 
     #   获取渠道数据
-    def _channelData(self, channel_info: tuple):
-        pass
+    def _channelData(self, channel_list: list, group_info: dict):
+        url = "https://game.weixin.qq.com/cgi-bin/gamewxagbdatawap/getwxagstat"
+        start_uix, end_uix = mytools.dateToStamps(self.date_tuple)
+        duration = end_uix - start_uix
+        field_list = [
+            "act_user",
+            "access_times",
+            "act_next_ratio",
+            "avg_delay",
+            "reg_user",
+            "reg_next_ratio",
+            "reg_total",
+        ]
+        #   field_list 和 sequence_item_conf 顺序是对应的
+        sequence_item_conf = [{
+            "stat_type": 1000088,
+            "data_field_id": 6,     # 活跃用户数
+        }, {
+            "stat_type": 1000088,
+            "data_field_id": 7,     # 访问次数
+        }, {
+            "stat_type": 1000089,   # 活跃用户次日留存率
+            "data_field_id": 6,
+        }, {
+            "stat_type": 1000088,   # 人均在线时长
+            "data_field_id": 9,
+        }, {
+            "stat_type": 1000091,   # 注册用户数
+            "data_field_id": 6,
+        }, {
+            "stat_type": 1000093,   # 注册用户次日留存率
+            "data_field_id": 6,
+        }, {
+            "stat_type": 1000094,   # 累计注册用户
+            "data_field_id": 6,
+        }]
+        #   下面两个配置的数据用不着 不要了
+        # {
+        #     "stat_type": 1000092,   # 新增付费用户数
+        #     "data_field_id": 6,
+        # }, {
+        #     "stat_type": 1000092,   # 新增付费金额
+        #     "data_field_id": 7,
+        # }
+        
+        #   构建发送的数据
+        sequence_index_list = []
+        for channel in channel_list:
+            for item in sequence_item_conf:
+                temp = {
+                    "size_type": 24,
+                    "stat_type": item['stat_type'],
+                    "data_field_id": item['data_field_id'],
+                    "filter_list": [
+                        {
+                            "field_id": 4,
+                            "value": group_info[1]
+                        },
+                        {
+                            "name": channel[3],
+                            "value": channel[2],
+                            "field_id": 5,
+                            "checked": True
+                        }
+                    ],
+                    "time_period": {
+                        "start_time": 1614096000,
+                        "duration_seconds": 604800
+                    }
+                }
+                sequence_index_list.append(temp)
+        request_data = {
+            "need_app_info": False,
+            "appid": "wxf846ea330ed135d7",
+            "sequence_index_list": sequence_index_list,
+            "group_index_list": [],
+            "rank_index_list": [],
+            "version": 2
+        }
+        reqdata = self._buildReqdata(request_data, (start_uix, duration))
+        reqs = warpGet(url, self.session_id, reqdata)
+        data = self._formatResChannelData(reqs, field_list)
+        self.api.up('addWeixinChannelData', data)
 
     #   处理请求数据
     def _buildReqdata(self, request_data: dict, time_period: tuple):
@@ -189,7 +318,7 @@ class MiniProgramGather:
     def _formatRes(self, reqs_json_dict: dict, field_list: list):
         res = []
         sequence_data_list = reqs_json_dict.get('data', {}).get('sequence_data_list')
-        if sequence_data_list:
+        if len(sequence_data_list) > 0:
             for i in range(0, len(field_list)):
                 field_name = field_list[i]
                 point_list = sequence_data_list[i]['point_list']
@@ -236,6 +365,28 @@ class MiniProgramGather:
                 res.append(temp)
         return res
 
+    #   处理渠道数据
+    #   对应渠道的 活跃 注册 等
+    def _formatResChannelData(self, reqs_json_dict: dict, field_list: list):
+        res = []
+        sequence_data_list = reqs_json_dict.get('data', {}).get('sequence_data_list')
+        if len(sequence_data_list) > 0:
+            for i in range(0, len(sequence_data_list)):
+                sequence = sequence_data_list[i]
+                #   获取渠道的 wxgamecid
+                wxgamecid = sequence.get('index', {}).get('filter_list', [{}, {}])[1].get('value', '')
+                point_list = sequence.get('point_list', [])
+                #   获取争取的字段名
+                field_name = field_list[i % len(field_list)]
+                for item in point_list:
+                    temp = {}
+                    temp[field_name] = item.get('value', 0)
+                    temp['day'] = item['label']
+                    temp['wxgamecid'] = wxgamecid
+                    temp['app_id'] = self.app_info['app_id']
+                    res.append(temp)
+        return res
+
     #   数据存储
     def saveToDb(self, tbl_name: str, data: list):
         filter_data = []
@@ -263,3 +414,25 @@ class MiniProgramGather:
                         logging.error("Not find group.Info:{0}".format(str(item)))
                 i += 1
         self.db.save(tbl_name, filter_data)
+
+    #   上传channel 和 group数据
+    def _upChannel(self):
+        #   该游戏的渠道分组上传
+        group_list = self.db.findAll("SELECT * FROM channel_group WHERE app_id={0}".format(self.app_info['app_id']))
+        data = list(map(lambda x: {
+            'group_id': x[0],
+            'req_value': x[1],
+            'name': x[2],
+            'app_id': x[3],
+            }, group_list))
+        self.api.up('addWeixinChannelGroup', data)
+        #   该游戏的渠道上传
+        channel_list = self.db.findAll("SELECT * FROM channel WHERE app_id={0}".format(self.app_info['app_id']))
+        data = list(map(lambda x: {
+            'app_id': x[1],
+            'out_channel_id': x[2],
+            'name': x[3],
+            'group_id': x[4],
+            'group_name': x[5],
+            }, channel_list))
+        self.api.up('addWeixinChannel', data)

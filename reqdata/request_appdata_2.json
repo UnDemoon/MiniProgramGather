@@ -7,7 +7,7 @@
         "act_seven_day_ratio"
     ],
     "request_data": {
-        "need_app_info": true,
+        "need_app_info": false,
         "appid": "wx60ac686b4635c4ba",
         "sequence_index_list": [
             {

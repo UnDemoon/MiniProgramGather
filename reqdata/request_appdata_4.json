@@ -7,7 +7,7 @@
         "reg_seven_day_ratio"
     ],
     "request_data": {
-        "need_app_info": true,
+        "need_app_info": false,
         "appid": "wx544d1855bb3963d5",
         "sequence_index_list": [
             {

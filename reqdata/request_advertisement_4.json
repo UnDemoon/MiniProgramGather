@@ -1,0 +1,26 @@
+{
+    "//": "广告金",
+    "api_interface": "addWeixinAppAdvertisement",
+    "field_name_list": [
+        "adv_gold"
+    ],
+    "request_data": {
+        "need_app_info": false,
+        "appid": "wx544d1855bb3963d5",
+        "sequence_index_list": [
+            {
+                "size_type": 24,
+                "stat_type": 1000190,
+                "data_field_id": 3,
+                "filter_list": [],
+                "time_period": {
+                    "start_time": 1612195200,
+                    "duration_seconds": 2592000
+                }
+            }
+        ],
+        "group_index_list": [],
+        "rank_index_list": [],
+        "version": 2
+    }
+}

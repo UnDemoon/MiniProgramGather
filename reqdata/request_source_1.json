@@ -1,0 +1,65 @@
+{
+    "//": "活跃、注册用户来源数据 - 只有采集 微信广告（33），其他没有采集",
+    "api_interface": "addSourceDistribution",
+    "field_name_list": [
+        "active_user",
+        "new_user"
+    ],
+    "request_data": {
+        "need_app_info":false,
+        "appid":"wx544d1855bb3963d5",
+        "sequence_index_list":[
+            {
+                "size_type":24,
+                "stat_type":1000004,
+                "data_field_id":4,
+                "filter_list":[
+                    {
+                        "name":"全部平台",
+                        "field_id":6,
+                        "value":"-9999"
+                    },
+                    {
+                        "name":"微信广告",
+                        "field_id":3,
+                        "value":"33",
+                        "checked":true
+                    }
+                ],
+                "time_period":{
+                    "start_time":1609430400,
+                    "duration_seconds":5356800
+                }
+            },
+            {
+                "size_type":24,
+                "stat_type":1000012,
+                "data_field_id":4,
+                "filter_list":[
+                    {
+                        "name":"全部平台",
+                        "field_id":6,
+                        "value":"-9999"
+                    },
+                    {
+                        "name":"微信广告",
+                        "field_id":2,
+                        "value":"33",
+                        "checked":true
+                    }
+                ],
+                "time_period":{
+                    "start_time":1612195200,
+                    "duration_seconds":2592000
+                }
+            }
+        ],
+        "group_index_list":[
+    
+        ],
+        "rank_index_list":[
+    
+        ],
+        "version":2
+    }
+}

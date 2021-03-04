@@ -4,7 +4,7 @@
 @Autor: Demoon
 @Date: 1970-01-01 08:00:00
 LastEditors: Please set LastEditors
-LastEditTime: 2021-03-03 14:54:41
+LastEditTime: 2021-03-04 10:52:04
 '''
 import requests
 import json
@@ -34,6 +34,7 @@ class HouyiApi:
             'addWeixinChannelGroup': self.host + '/api/WeixinData/addWeixinChannelGroup.html',
             'addWeixinChannel': self.host + '/api/WeixinData/addWeixinChannel.html',
             'addWeixinChannelData': self.host + '/api/WeixinData/addWeixinChannelData.html',
+            'addSourceDistribution': self.host + '/api/WeixinData/addSourceDistribution.html',
         }
         self.token = self._getToken(account, pwd)
 
@@ -71,6 +72,7 @@ class HouyiApi:
 
     #   上传数据重传机制
     def _subUp(self, url, data, time_count=3):
+        res = False
         count = time_count
         if count > 0:
             res = self.post(url, data)

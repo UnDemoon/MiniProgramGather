@@ -5,7 +5,7 @@
 @Autor: Demoon
 @Date: 1970-01-01 08:00:00
 LastEditors: Please set LastEditors
-LastEditTime: 2021-03-03 17:35:24
+LastEditTime: 2021-03-04 15:52:33
 '''
 #  基础模块
 import sys
@@ -27,6 +27,9 @@ from MiniProgramGather import MiniProgramGather as MPG
 logging.basicConfig(filename='_debug-log.log', level=logging.ERROR,
                     format='%(asctime)s - %(filename)s[line:%(lineno)d] - %(levelname)s: %(message)s')
 
+#   线程限制信号量
+thread_max = threading.BoundedSemaphore(12)
+
 
 # 采集线程
 class GatherThread(threading.Thread):
@@ -43,6 +46,7 @@ class GatherThread(threading.Thread):
         #   数据采集
         mpg = MPG(self.session_id, self.date_tuple, self.app_info, self.api, self.db)
         mpg.runGatherer()
+        thread_max.release()
 
 
 # if __name__ == '__main__':
@@ -58,7 +62,7 @@ class GatherThread(threading.Thread):
 #     sys.exit(app.exec_())
 
 if __name__ == '__main__':
-    session = 'BgAAda6OLAOPn56gwd5WwnCRP8Jlxp3zSd2NR5iMqRSFC1I'
+    session = 'BgAAeqaaPxS6Ru3jahK0qaaUKLQJsBNmoDCxKjLQgfzbU9U'
     date_today = datetime.date.today()
     dates = (datetime.datetime(2021, 2, 25, 0, 0, 0), datetime.datetime(date_today.year, date_today.month, date_today.day, 0, 0, 0))
     #   线程池
@@ -82,6 +86,7 @@ if __name__ == '__main__':
             if not app_id or not appid:
                 break
             app_info = {'appid': appid, 'app_id': app_id}
+            thread_max.acquire()
             gather = GatherThread(session, dates, app_info, houyiApi, mydb)
             thread_pool.append(gather)
             gather.start()

@@ -1,7 +1,7 @@
 '''
 Author: Demoon
 Date: 2021-02-23 10:06:02
-LastEditTime: 2021-03-03 17:34:32
+LastEditTime: 2021-03-04 10:55:57
 LastEditors: Please set LastEditors
 Description: 微信小游戏数据助手爬取类
 FilePath: /MiniProgramGather/MiniProgram.py
@@ -70,7 +70,7 @@ class MiniProgramGather:
                     req_conf = json.load(f)
                     reqdata = self._buildReqdata(req_conf['request_data'], (start_uix, duration))
                     reqs = warpGet(url, self.session_id, reqdata)
-                    data = self._formatRes(reqs, req_conf['field_name_list'])
+                    data = self._formatRes(reqs, req_conf['field_name_list'], req_conf['api_interface'])
                     self.api.up(req_conf['api_interface'], data)
         #   渠道相关特殊采集
         self.channelData()
@@ -315,7 +315,7 @@ class MiniProgramGather:
         return request_data
 
     #   处理返回数据
-    def _formatRes(self, reqs_json_dict: dict, field_list: list):
+    def _formatRes(self, reqs_json_dict: dict, field_list: list, data_type: str):
         res = []
         sequence_data_list = reqs_json_dict.get('data', {}).get('sequence_data_list')
         if len(sequence_data_list) > 0:
@@ -324,9 +324,18 @@ class MiniProgramGather:
                 point_list = sequence_data_list[i]['point_list']
                 for item in point_list:
                     temp = {}
-                    temp[field_name] = item.get('value', 0)
-                    temp['day'] = item['label']
-                    temp['app_id'] = self.app_info['app_id']
+                    #   根据数据类型区分处理方式
+                    if data_type == "addSourceDistribution":
+                        temp['value'] = item.get('value', 0)
+                        temp['value_type'] = i + 1    # i=0 active_user i=1 new_user 配合后台
+                        temp['day'] = item['label']
+                        temp['label_value'] = 33
+                        temp['label'] = "微信广告"
+                        temp['appId'] = self.app_info['appid']
+                    else:
+                        temp[field_name] = item.get('value', 0)
+                        temp['day'] = item['label']
+                        temp['app_id'] = self.app_info['app_id']
                     res.append(temp)
         return res
 

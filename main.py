@@ -5,7 +5,7 @@
 @Autor: Demoon
 @Date: 1970-01-01 08:00:00
 LastEditors: Please set LastEditors
-LastEditTime: 2021-03-04 15:52:33
+LastEditTime: 2021-03-05 16:11:15
 '''
 #  基础模块
 import sys
@@ -13,8 +13,6 @@ import time
 import datetime
 import logging
 import threading
-#   qt5
-from PyQt5.QtCore import QDate
 #   引入浏览器线程类#   引入api类
 from HouyiApi import HouyiApi as Api
 from MyDB import MyDB
@@ -62,13 +60,21 @@ class GatherThread(threading.Thread):
 #     sys.exit(app.exec_())
 
 if __name__ == '__main__':
-    session = 'BgAAeqaaPxS6Ru3jahK0qaaUKLQJsBNmoDCxKjLQgfzbU9U'
+    #   后台api
+    houyiApi = Api()
+    #   获取后台配置
+    conf = houyiApi.up('getMpgConf', '')
+    session = conf.get('Result', {}).get('session_conf', {}).get('session_id')
+    recent_days = conf.get('Result', {}).get('session_conf', {}).get('recent_days')
+    if not session or not recent_days:
+        logging.error('获取后台配置异常')
+    #   根据日期构建采集时间数据
     date_today = datetime.date.today()
-    dates = (datetime.datetime(2021, 2, 25, 0, 0, 0), datetime.datetime(date_today.year, date_today.month, date_today.day, 0, 0, 0))
+    end_datetime = datetime.datetime(date_today.year, date_today.month, date_today.day, 0, 0, 0)
+    start_datetime = end_datetime - datetime.timedelta(days=int(recent_days))
+    dates = (start_datetime, end_datetime)
     #   线程池
     thread_pool = []
-    #   上传api
-    houyiApi = Api()
     #   本地db
     mydb = MyDB()
     #   处理appid与app_id数据
@@ -78,21 +84,26 @@ if __name__ == '__main__':
     for app in app_list:
         app_dict[app['appid']] = app['id']
     #   抓取数据
-    gl = MPGModel.listGames(session)
-    if len(app_dict) > 0 and len(gl) > 0:
-        for g in gl:
-            app_id = app_dict.get(g['appid'])
-            appid = g.get('appid')
-            if not app_id or not appid:
-                break
-            app_info = {'appid': appid, 'app_id': app_id}
-            thread_max.acquire()
-            gather = GatherThread(session, dates, app_info, houyiApi, mydb)
-            thread_pool.append(gather)
-            gather.start()
-            # break
-    #   线程统一等待完成
-    #   所有完成才可继续主进程
-    for t in thread_pool:
-        t.join()
-    print('END!')
+    gl_info = MPGModel.listGames(session)
+    if gl_info['errcode'] != 0:     # 不为0 说明接口返回错误，默认是session的问题
+        houyiApi.up('notifyMpgConf', {'run_res': 0})
+    else:
+        gl = gl_info['game_list']
+        if len(app_dict) > 0 and len(gl) > 0:
+            for g in gl:
+                app_id = app_dict.get(g['appid'])
+                appid = g.get('appid')
+                if not app_id or not appid:
+                    break
+                app_info = {'appid': appid, 'app_id': app_id}
+                thread_max.acquire()
+                gather = GatherThread(session, dates, app_info, houyiApi, mydb)
+                thread_pool.append(gather)
+                gather.start()
+                # break
+        #   线程统一等待完成
+        #   所有完成才可继续主进程
+        for t in thread_pool:
+            t.join()
+        houyiApi.up('notifyMpgConf', {'run_res': 1})
+    print("Run End!")

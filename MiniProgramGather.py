@@ -1,7 +1,7 @@
 '''
 Author: Demoon
 Date: 2021-02-23 10:06:02
-LastEditTime: 2021-03-04 10:55:57
+LastEditTime: 2021-03-05 15:58:20
 LastEditors: Please set LastEditors
 Description: 微信小游戏数据助手爬取类
 FilePath: /MiniProgramGather/MiniProgram.py
@@ -24,15 +24,19 @@ def warpGet(url, session_id, data):
 
 #   获取游戏列表
 def listGames(session_id):
-    game_list = []
+    res = {
+        'errcode': '',
+        'game_list': []
+    }
     url = "https://game.weixin.qq.com/cgi-bin/gamewxagdatawap/getwxagapplist"
     data = {"offset": "0", "limit": 20}
     while True:
         #   请求数据
-        res = warpGet(url, session_id, data)
+        reqs = warpGet(url, session_id, data)
+        res['errcode'] = reqs.get('errcode', 0)
         #   处理数据
-        get_data = res.get('data', {})
-        game_list += map(lambda x: {
+        get_data = reqs.get('data', {})
+        res['game_list'] += map(lambda x: {
                 "appid": x['appid'],
                 "appname": x['appname']
             }, get_data.get('app_list', []))
@@ -41,7 +45,7 @@ def listGames(session_id):
             data['offset'] = get_data.get('next_offset')
         else:
             break
-    return game_list
+    return res
 
 
 #   单个游戏采集类

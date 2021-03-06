@@ -1,7 +1,7 @@
 '''
 Author: your name
 Date: 2021-02-23 10:02:01
-LastEditTime: 2021-03-03 14:51:48
+LastEditTime: 2021-03-06 13:50:29
 LastEditors: Please set LastEditors
 Description: In User Settings Edit
 FilePath: /MiniProgramGather/utils.py
@@ -11,7 +11,6 @@ import time
 import requests
 from urllib import parse
 import datetime
-from PyQt5.QtCore import QDateTime, QDate, QTime
 #   忽略证书警告
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
@@ -52,16 +51,18 @@ def dateList(dateAry: tuple):
     return res
 
 
-#   QDate 转时间戳
+#   datetime 转时间戳
 #   dateAry (datetime, datetime)
 def dateToStamps(dateAry: tuple):
     start, end = dateAry
     return (int(start.timestamp()), int(end.timestamp()))
 
 
-#   时间戳转 Qtime
+#   时间戳转 date
 def unixTimeDate(unix_time: int):
-    return QDateTime.fromSecsSinceEpoch(unix_time)
+    timeArray = time.localtime(unix_time)
+    date = time.strftime("%Y-%m-%d", timeArray)
+    return date
 
 
 #   拆解url参数
@@ -114,5 +115,7 @@ def writeToFile(file_path: str, data_str: str):
 
 
 if __name__ == '__main__':
-    a = ['a', 'b', 'c']
-    print(a[3%len(a)])
+    # a = ['a', 'b', 'c']
+    # print(a[3%len(a)])
+    res = unixTimeDate(1614787200)
+    print(res)

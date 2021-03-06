@@ -1,7 +1,7 @@
 '''
 Author: Demoon
 Date: 2021-02-23 10:06:02
-LastEditTime: 2021-03-05 15:58:20
+LastEditTime: 2021-03-06 14:16:03
 LastEditors: Please set LastEditors
 Description: 微信小游戏数据助手爬取类
 FilePath: /MiniProgramGather/MiniProgram.py
@@ -78,7 +78,46 @@ class MiniProgramGather:
                     self.api.up(req_conf['api_interface'], data)
         #   渠道相关特殊采集
         self.channelData()
-        self._upChannel()    # 上传渠道 渠道分组
+        #   微信广告收入采集
+        self.advIncome()
+
+    #   微信广告收入采集
+    def advIncome(self):
+        url = "https://game.weixin.qq.com/cgi-bin/gamewxagbdatawap/getwxagstat"
+        dayuix_list = mytools.dateList(self.date_tuple)
+        duration = 24 * 60 * 60  # 86400
+        request_data = {
+            "need_app_info": False,
+            "appid": "wx544d1855bb3963d5",
+            "sequence_index_list": [],
+            "group_index_list": [
+                {
+                    "size_type": 24,
+                    "stat_type": 1000121,
+                    "data_field_id": 5,
+                    "filter_list": [
+                        {
+                            "field_id": 4,
+                            "value": "ad"
+                        }
+                    ],
+                    "time_period": {
+                        "start_time": 1614787200,
+                        "duration_seconds": 86400
+                    },
+                    "group_id": 3,
+                    "limit": 50,
+                    "is_stat_order_asc": False
+                }
+            ],
+            "rank_index_list": [],
+            "version": 2
+        }
+        for suix in dayuix_list:
+            reqdata = self._buildReqdata(request_data, (suix, duration))
+            reqs = warpGet(url, self.session_id, reqdata)
+            data = self._formatResAdvIncome(reqs, ['income'])
+            self.api.up('addStatement', data)
 
     #   特殊处理获取渠道数据接口
     def channelData(self):
@@ -119,6 +158,8 @@ class MiniProgramGather:
             channel_list = self.db.findAll("SELECT * FROM channel WHERE app_id={0} AND group_id={1}".format(self.app_info['app_id'], group[0]))
             if len(channel_list) > 0:
                 self._channelData(channel_list, group)
+        # 上传渠道 渠道分组
+        self._upChannel()
 
     #   获取渠道
     def _channel(self, group_info: tuple):
@@ -398,6 +439,26 @@ class MiniProgramGather:
                     temp['wxgamecid'] = wxgamecid
                     temp['app_id'] = self.app_info['app_id']
                     res.append(temp)
+        return res
+
+    #   处理微信广告收入数据
+    def _formatResAdvIncome(self, reqs_json_dict: dict, filter_list: list):
+        res = []
+        group_data_list = reqs_json_dict.get('data', {}).get('group_data_list')
+        if len(group_data_list) > 0:
+            for i in range(0, len(group_data_list)):
+                point_list = group_data_list[i].get('point_list', [])
+                day_uix = group_data_list[i].get('index', {}).get('time_period', {}).get('start_time')
+                #   获取争取的字段名
+                field_name = filter_list[i]
+                for item in point_list:
+                    if int(item.get('label_value', 0)) == 33:    # 只取微信广告，其他没用
+                        temp = {}
+                        temp[field_name] = item.get('value', 0)
+                        temp['day'] = mytools.unixTimeDate(int(day_uix))
+                        temp['group_value'] = 4    # 之前认定场景值 微信广告
+                        temp['appId'] = self.app_info['appid']
+                        res.append(temp)
         return res
 
     #   数据存储

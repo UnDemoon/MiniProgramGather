@@ -5,7 +5,7 @@
 @Autor: Demoon
 @Date: 1970-01-01 08:00:00
 LastEditors: Please set LastEditors
-LastEditTime: 2021-03-05 16:11:15
+LastEditTime: 2021-03-06 16:03:52
 '''
 #  基础模块
 import sys
@@ -66,6 +66,8 @@ if __name__ == '__main__':
     conf = houyiApi.up('getMpgConf', '')
     session = conf.get('Result', {}).get('session_conf', {}).get('session_id')
     recent_days = conf.get('Result', {}).get('session_conf', {}).get('recent_days')
+    # session = "BgAAIIGfYLM4f-f9DPbr1u6DIpq6sRUlmxkYyQ6xhFvldIM"
+    # recent_days = 3
     if not session or not recent_days:
         logging.error('获取后台配置异常')
     #   根据日期构建采集时间数据

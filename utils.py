@@ -1,11 +1,12 @@
 '''
 Author: your name
 Date: 2021-02-23 10:02:01
-LastEditTime: 2021-03-08 17:43:53
+LastEditTime: 2021-03-09 16:51:02
 LastEditors: Please set LastEditors
 Description: In User Settings Edit
 FilePath: /MiniProgramGather/utils.py
 '''
+import os
 import random
 import time
 import requests
@@ -113,6 +114,12 @@ def writeToFile(file_path: str, data_str: str):
     with open(file_path, 'a+') as f:
         f.write(data_str)
 
+
+#   文件的路径
+def filePath(file_name: str):
+    path = os.path.dirname(os.path.abspath(__file__))  # 获取当前路径
+    file = os.path.join(path, file_name)
+    return file
 
 if __name__ == '__main__':
     # a = ['a', 'b', 'c']

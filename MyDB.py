@@ -1,17 +1,20 @@
 '''
 Author: Demoon
 Date: 2021-03-02 09:55:45
-LastEditTime: 2021-03-02 15:43:22
+LastEditTime: 2021-03-09 16:51:43
 LastEditors: Please set LastEditors
 Description: 运营 sqlite3 的本地存储系统
 FilePath: \\MiniProgramGather\\MyDB.py
 '''
 import sqlite3
 import logging
+import utils as myTools
+
 
 class MyDB:
     def __init__(self, db_file='mpg.sqlite3.db'):
-        self.conn = sqlite3.connect(db_file, check_same_thread=False)
+        file = myTools.filePath(db_file)
+        self.conn = sqlite3.connect(file, check_same_thread=False)
 
     #   运行sql语句 无返回类
     def runSql(self, sql):

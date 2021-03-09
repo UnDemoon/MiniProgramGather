@@ -5,7 +5,7 @@
 @Autor: Demoon
 @Date: 1970-01-01 08:00:00
 LastEditors: Please set LastEditors
-LastEditTime: 2021-03-09 15:43:08
+LastEditTime: 2021-03-09 16:34:43
 '''
 #  基础模块
 import sys
@@ -22,7 +22,7 @@ import utils as myTools
 import MiniProgramGather as MPGModel
 from MiniProgramGather import MiniProgramGather as MPG
 
-logging.basicConfig(filename='_debug-log.log', level=logging.ERROR,
+logging.basicConfig(filename='./_debug-log.log', level=logging.ERROR,
                     format='%(asctime)s - %(filename)s[line:%(lineno)d] - %(levelname)s: %(message)s')
 
 

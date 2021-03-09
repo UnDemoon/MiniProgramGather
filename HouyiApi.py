@@ -4,11 +4,13 @@
 @Autor: Demoon
 @Date: 1970-01-01 08:00:00
 LastEditors: Please set LastEditors
-LastEditTime: 2021-03-09 11:41:25
+LastEditTime: 2021-03-09 16:52:22
 '''
 import requests
 import json
 import time
+import os
+import utils as myTools
 # import datetime
 
 
@@ -20,7 +22,8 @@ class HouyiApi:
         secret_key='cd283176e1e2c2a69a00e76a52742d42a4ae0b3780eec48fae289977008e9a3b',
         platform_type='WeixinData',
     ):
-        with open("./config-default.json", encoding='utf-8') as defcfg:
+        file = myTools.filePath("config-default.json")
+        with open(file, encoding='utf-8') as defcfg:
             cfg = json.load(defcfg)
         self.host = cfg['upload_host']
         self.secret_key = secret_key

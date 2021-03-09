@@ -1,7 +1,7 @@
 '''
 Author: Demoon
 Date: 2021-02-23 10:06:02
-LastEditTime: 2021-03-09 12:01:09
+LastEditTime: 2021-03-09 15:42:34
 LastEditors: Please set LastEditors
 Description: 微信小游戏数据助手爬取类
 FilePath: /MiniProgramGather/MiniProgram.py
@@ -302,8 +302,9 @@ class MiniProgramGather:
             reqdata = self._buildReqdata(request_data, (end_uix, duration))
             reqs = warpGet(url, self.session_id, reqdata)
             next_page = reqs.get('data', {}).get('rank_data_list', [{}])[0].get("next_page")
+            has_next = reqs.get('data', {}).get('rank_data_list', [{}])[0].get("has_next", False)
             data += self._formatResChannel(reqs)
-            if next_page:
+            if has_next and next_page:
                 request_data['rank_index_list'][0]['cur_page'] = next_page
             else:
                 break

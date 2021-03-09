@@ -1,7 +1,7 @@
 '''
 Author: Demoon
 Date: 2021-02-23 10:06:02
-LastEditTime: 2021-03-08 17:39:59
+LastEditTime: 2021-03-09 12:01:09
 LastEditors: Please set LastEditors
 Description: 微信小游戏数据助手爬取类
 FilePath: /MiniProgramGather/MiniProgram.py
@@ -80,6 +80,58 @@ class MiniProgramGather:
         self.channelData()
         #   微信广告收入采集
         self.advIncome()
+        #   实时数据
+        self.realTime()
+
+    #   实时数据采集 - 访问数据  访问人数、注册、访问次数
+    def realTime(self):
+        url = "https://game.weixin.qq.com/cgi-bin/gamewxagbdatawap/getwxagstat"
+        dayuix_list = mytools.dateList(self.date_tuple)
+        duration = 24 * 60 * 60  # 86400
+        request_data = {
+                "need_app_info": True,
+                "appid": "wx544d1855bb3963d5",
+                "sequence_index_list": [
+                    {
+                        "size_type": 60,
+                        "stat_type": 1000122,
+                        "data_field_id": 5,
+                        "filter_list": [],
+                        "time_period": {
+                            "start_time": 1615132800,
+                            "duration_seconds": 86400
+                        }
+                    },
+                    {
+                        "size_type": 60,
+                        "stat_type": 1000123,
+                        "data_field_id": 4,
+                        "filter_list": [],
+                        "time_period": {
+                            "start_time": 1615132800,
+                            "duration_seconds": 86400
+                        }
+                    },
+                    {
+                        "size_type": 60,
+                        "stat_type": 1000122,
+                        "data_field_id": 4,
+                        "filter_list": [],
+                        "time_period": {
+                            "start_time": 1615132800,
+                            "duration_seconds": 86400
+                        }
+                    }
+                ],
+                "group_index_list": [],
+                "rank_index_list": [],
+                "version": 2
+            }
+        for suix in dayuix_list:
+            reqdata = self._buildReqdata(request_data, (suix, duration))
+            reqs = warpGet(url, self.session_id, reqdata)
+            data = self._formatRes(reqs, ['visit_user', 'reg_user', 'visit_times'], "addTimeData")
+            self.api.up('addTimeData', data)
 
     #   微信广告收入采集
     def advIncome(self):
@@ -377,6 +429,10 @@ class MiniProgramGather:
                         temp['label_value'] = 33
                         temp['label'] = "微信广告"
                         temp['appId'] = self.app_info['appid']
+                    elif data_type == "addTimeData":
+                        temp[field_name] = item.get('value', 0)
+                        temp['time'] = item['label_value']
+                        temp['app_id'] = self.app_info['app_id']
                     else:
                         temp[field_name] = item.get('value', 0)
                         temp['day'] = item['label']

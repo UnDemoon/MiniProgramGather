@@ -5,7 +5,7 @@
 @Autor: Demoon
 @Date: 1970-01-01 08:00:00
 LastEditors: Please set LastEditors
-LastEditTime: 2021-03-08 17:43:40
+LastEditTime: 2021-03-09 12:01:16
 '''
 #  基础模块
 import sys
@@ -91,6 +91,9 @@ class GatherThread(threading.Thread):
 
 
 if __name__ == '__main__':
+    # houyiApi = Api()
+    # info = (1, "BgAAJVYt_N23Dj_UG--JaVdKJViI5uQ-6HcXOQv_kJY_QWY", 5)
+    # oneProcess(info, houyiApi)
     #   后台api
     houyiApi = Api()
     #   获取后台配置

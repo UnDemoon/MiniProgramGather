@@ -3,8 +3,8 @@
     "field_name_list": [
         "income",
         "show_times",
-        "click_times",
-        "click_ratio"
+        "click_ratio",
+        "click_times"
     ],
     "request_data": {
         "need_app_info": false,

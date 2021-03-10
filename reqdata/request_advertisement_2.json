@@ -3,8 +3,8 @@
     "api_interface": "addWeixinAppAdvertisement",
     "field_name_list": [
         "banner_income",
-        "banner_show_times",
         "banner_click_times",
+        "banner_show_times",
         "banner_ratio"
     ],
     "request_data": {

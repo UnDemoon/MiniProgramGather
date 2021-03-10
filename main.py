@@ -5,7 +5,7 @@
 @Autor: Demoon
 @Date: 1970-01-01 08:00:00
 LastEditors: Please set LastEditors
-LastEditTime: 2021-03-09 16:34:43
+LastEditTime: 2021-03-10 12:00:13
 '''
 #  基础模块
 import sys
@@ -57,7 +57,7 @@ def oneProcess(proinfo: tuple, houyiApi: object):
                 app_id = app_dict.get(g['appid'])
                 appid = g.get('appid')
                 if not app_id or not appid:
-                    break
+                    continue
                 app_info = {'appid': appid, 'app_id': app_id}
                 thread_max.acquire()
                 gather = GatherThread(session, dates, app_info, houyiApi, mydb, thread_max)

@@ -2,9 +2,9 @@
     "api_interface": "addWeixinAppAdvertisement",
     "field_name_list": [
         "income",
+        "click_times",
         "show_times",
-        "click_ratio",
-        "click_times"
+        "click_ratio"
     ],
     "request_data": {
         "need_app_info": false,

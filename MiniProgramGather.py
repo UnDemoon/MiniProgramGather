@@ -1,7 +1,7 @@
 '''
 Author: Demoon
 Date: 2021-02-23 10:06:02
-LastEditTime: 2021-03-09 16:43:27
+LastEditTime: 2021-03-12 10:44:29
 LastEditors: Please set LastEditors
 Description: 微信小游戏数据助手爬取类
 FilePath: /MiniProgramGather/MiniProgram.py
@@ -66,7 +66,7 @@ class MiniProgramGather:
         start_uix, end_uix = mytools.dateToStamps(self.date_tuple)
         duration = end_uix - start_uix
         url = "https://game.weixin.qq.com/cgi-bin/gamewxagbdatawap/getwxagstat"
-        path = "./reqdata/"
+        path = mytools.filePath("./reqdata/")
         for root, dirs, files in os.walk(path):
             for file in files:
                 file_path = os.path.join(root, file)

@@ -5,7 +5,7 @@
 @Autor: Demoon
 @Date: 1970-01-01 08:00:00
 LastEditors: Please set LastEditors
-LastEditTime: 2021-03-10 12:00:13
+LastEditTime: 2021-03-12 10:44:45
 '''
 #  基础模块
 import sys
@@ -83,7 +83,6 @@ class GatherThread(threading.Thread):
         self.thread_max = thread_max
 
     def run(self):
-        # api = Api()
         #   数据采集
         mpg = MPG(self.session_id, self.date_tuple, self.app_info, self.api, self.db)
         mpg.runGatherer()
@@ -92,7 +91,7 @@ class GatherThread(threading.Thread):
 
 if __name__ == '__main__':
     # houyiApi = Api()
-    # info = (1, "BgAAJVYt_N23Dj_UG--JaVdKJViI5uQ-6HcXOQv_kJY_QWY", 5)
+    # info = (1, "BgAAfNlXTopXQgBaJI2LRzDb8Pj5Qxu0MJkVoddafLM6eTQ", 5)
     # oneProcess(info, houyiApi)
     #   后台api
     houyiApi = Api()
@@ -107,4 +106,4 @@ if __name__ == '__main__':
             oneProcess(info, houyiApi)
         else:
             logging.error('后台配置异常，conf:{0}'.format(str(conf)))
-    print("Run End!")
+    print("Run End!\n")

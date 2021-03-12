@@ -1,7 +1,7 @@
 '''
 Author: Demoon
 Date: 2021-03-02 09:55:45
-LastEditTime: 2021-03-09 16:51:43
+LastEditTime: 2021-03-12 17:51:56
 LastEditors: Please set LastEditors
 Description: 运营 sqlite3 的本地存储系统
 FilePath: \\MiniProgramGather\\MyDB.py
@@ -71,8 +71,8 @@ class MyDB:
         self.conn.close()
         return True
 
-if __name__ == '__main__':
-    db = MyDB()
-    # db.save('channel_group', [('1','sss', '111'),('1','sss', '111')])
-    res = db.findAll('SELECT * FROM channel_group WHERE id!=100')
-    print(res)
+# if __name__ == '__main__':
+#     db = MyDB()
+#     # db.save('channel_group', [('1','sss', '111'),('1','sss', '111')])
+#     res = db.findAll('SELECT * FROM channel_group WHERE id!=100')
+#     print(res)

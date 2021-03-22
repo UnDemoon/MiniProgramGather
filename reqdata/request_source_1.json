@@ -3,6 +3,8 @@
     "api_interface": "addSourceDistribution",
     "field_name_list": [
         "active_user",
+        "new_user",
+        "active_user",
         "new_user"
     ],
     "request_data": {
@@ -50,6 +52,50 @@
                 ],
                 "time_period":{
                     "start_time":1612195200,
+                    "duration_seconds":2592000
+                }
+            },
+            {
+                "size_type":24,
+                "stat_type":1000004,
+                "data_field_id":4,
+                "filter_list":[
+                    {
+                        "name":"全部平台",
+                        "field_id":6,
+                        "value":"-9999"
+                    },
+                    {
+                        "name":"其他小程序",
+                        "field_id":3,
+                        "value":"22",
+                        "checked":true
+                    }
+                ],
+                "time_period":{
+                    "start_time":1613491200,
+                    "duration_seconds":2592000
+                }
+            },
+            {
+                "size_type":24,
+                "stat_type":1000012,
+                "data_field_id":4,
+                "filter_list":[
+                    {
+                        "name":"全部平台",
+                        "field_id":6,
+                        "value":"-9999"
+                    },
+                    {
+                        "name":"其他小程序",
+                        "field_id":2,
+                        "value":"22",
+                        "checked":true
+                    }
+                ],
+                "time_period":{
+                    "start_time":1613491200,
                     "duration_seconds":2592000
                 }
             }

@@ -1,7 +1,7 @@
 '''
 Author: Demoon
 Date: 2021-02-23 10:06:02
-LastEditTime: 2021-03-12 10:44:29
+LastEditTime: 2021-03-19 17:02:18
 LastEditors: Please set LastEditors
 Description: 微信小游戏数据助手爬取类
 FilePath: /MiniProgramGather/MiniProgram.py
@@ -80,8 +80,8 @@ class MiniProgramGather:
         self.channelData()
         #   微信广告收入采集
         self.advIncome()
-        #   实时数据
-        self.realTime()
+        #   实时数据 用不着 不采了
+        # self.realTime()
 
     #   实时数据采集 - 访问数据  访问人数、注册、访问次数
     def realTime(self):
@@ -424,11 +424,13 @@ class MiniProgramGather:
                     temp = {}
                     #   根据数据类型区分处理方式
                     if data_type == "addSourceDistribution":
+                        label_value = sequence_data_list[i].get('index', {}).get('filter_list', [{}, {}])[1].get('value')
+                        label_name = "微信广告" if int(label_value) == 33 else "其他小程序"
                         temp['value'] = item.get('value', 0)
-                        temp['value_type'] = i + 1    # i=0 active_user i=1 new_user 配合后台
+                        temp['value_type'] = 1 if 'active_user' == field_name else 0   # 1-active_user 其他-new_user 配合后台
                         temp['day'] = item['label']
-                        temp['label_value'] = 33
-                        temp['label'] = "微信广告"
+                        temp['label_value'] = label_value
+                        temp['label'] = label_name
                         temp['appId'] = self.app_info['appid']
                     elif data_type == "addTimeData":
                         temp[field_name] = item.get('value', 0)

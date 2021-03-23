@@ -5,7 +5,7 @@
 @Autor: Demoon
 @Date: 1970-01-01 08:00:00
 LastEditors: Please set LastEditors
-LastEditTime: 2021-03-12 10:44:45
+LastEditTime: 2021-03-23 17:29:41
 '''
 #  基础模块
 import sys
@@ -30,7 +30,7 @@ logging.basicConfig(filename='./_debug-log.log', level=logging.ERROR,
 def oneProcess(proinfo: tuple, houyiApi: object):
     info_id, session, recent_days = proinfo
     #   线程限制信号量
-    thread_max = threading.BoundedSemaphore(12)
+    thread_max = threading.BoundedSemaphore(8)
     #   根据日期构建采集时间数据
     date_today = datetime.date.today()
     end_datetime = datetime.datetime(date_today.year, date_today.month, date_today.day, 0, 0, 0)
@@ -90,14 +90,20 @@ class GatherThread(threading.Thread):
 
 
 if __name__ == '__main__':
-    # houyiApi = Api()
-    # info = (1, "BgAAfNlXTopXQgBaJI2LRzDb8Pj5Qxu0MJkVoddafLM6eTQ", 5)
-    # oneProcess(info, houyiApi)
+    #   运行类型    区分手动和自动运行 1自动 2手动
+    global RUN_TYPE
+    # 登录界面的url
+    try:
+        RUN_TYPE = int(sys.argv[1])
+    except Exception:
+        RUN_TYPE = 1
     #   后台api
     houyiApi = Api()
     #   获取后台配置
     confs = houyiApi.up('getMpgConf', '')
     for conf in confs.get('Result', {}).get('session_conf', []):
+        if RUN_TYPE == 2 and 1 != int(conf.get('runing', 0)):   # 手动运行
+            continue
         conf_id = conf.get('id')
         session = conf.get('session_id')
         recent_days = conf.get('recent_days')

@@ -5,7 +5,7 @@
 @Autor: Demoon
 @Date: 1970-01-01 08:00:00
 LastEditors: Please set LastEditors
-LastEditTime: 2021-03-23 17:29:41
+LastEditTime: 2021-03-27 15:01:06
 '''
 #  基础模块
 import sys
@@ -99,6 +99,9 @@ if __name__ == '__main__':
         RUN_TYPE = 1
     #   后台api
     houyiApi = Api()
+    #   测试
+    # info = (1, 'BgAAhaAHpnl8FSLjeHyKFZph-ttLAvA4Dow1kprrk3KtD3I', 10)
+    # oneProcess(info, houyiApi)
     #   获取后台配置
     confs = houyiApi.up('getMpgConf', '')
     for conf in confs.get('Result', {}).get('session_conf', []):

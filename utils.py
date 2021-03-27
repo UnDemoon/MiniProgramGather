@@ -1,7 +1,7 @@
 '''
 Author: your name
 Date: 2021-02-23 10:02:01
-LastEditTime: 2021-03-09 16:51:02
+LastEditTime: 2021-03-27 14:35:40
 LastEditors: Please set LastEditors
 Description: In User Settings Edit
 FilePath: /MiniProgramGather/utils.py
@@ -101,7 +101,7 @@ def logFile(strings: str, file='_ctm_debug-log.log'):
     字符串写入文件
     """
     now = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
-    with open(file, 'a+') as f:
+    with open(file, 'a+', encoding='utf-8') as f:
         f.write('\n')
         f.write(now)
         f.write('\n')
@@ -111,7 +111,7 @@ def logFile(strings: str, file='_ctm_debug-log.log'):
 
 #   写入文件
 def writeToFile(file_path: str, data_str: str):
-    with open(file_path, 'a+') as f:
+    with open(file_path, 'a+', encoding='utf-8') as f:
         f.write(data_str)
 
 
@@ -121,8 +121,6 @@ def filePath(file_name: str):
     file = os.path.join(path, file_name)
     return file
 
+
 if __name__ == '__main__':
-    # a = ['a', 'b', 'c']
-    # print(a[3%len(a)])
-    res = unixTimeDate(1614787200)
-    print(res)
+    pass

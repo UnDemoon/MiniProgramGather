@@ -1,7 +1,7 @@
 '''
 Author: Demoon
 Date: 2021-02-23 10:06:02
-LastEditTime: 2021-03-19 17:02:18
+LastEditTime: 2021-03-27 14:48:05
 LastEditors: Please set LastEditors
 Description: 微信小游戏数据助手爬取类
 FilePath: /MiniProgramGather/MiniProgram.py
@@ -65,6 +65,7 @@ class MiniProgramGather:
         #   基础采集
         start_uix, end_uix = mytools.dateToStamps(self.date_tuple)
         duration = end_uix - start_uix
+        week_duration = 8 * 24 * 60 * 60
         url = "https://game.weixin.qq.com/cgi-bin/gamewxagbdatawap/getwxagstat"
         path = mytools.filePath("./reqdata/")
         for root, dirs, files in os.walk(path):
@@ -72,7 +73,11 @@ class MiniProgramGather:
                 file_path = os.path.join(root, file)
                 with open(file_path, 'r', encoding='utf-8') as f:
                     req_conf = json.load(f)
-                    reqdata = self._buildReqdata(req_conf['request_data'], (start_uix, duration))
+                    #   这两个是采7留的，所以至少8天吧
+                    if (file == 'request_appdata_2.json' or file == 'request_appdata_4.json') and duration < week_duration:
+                        reqdata = self._buildReqdata(req_conf['request_data'], (end_uix - week_duration, week_duration))
+                    else:
+                        reqdata = self._buildReqdata(req_conf['request_data'], (start_uix, duration))
                     reqs = warpGet(url, self.session_id, reqdata)
                     data = self._formatRes(reqs, req_conf['field_name_list'], req_conf['api_interface'])
                     self.api.up(req_conf['api_interface'], data)

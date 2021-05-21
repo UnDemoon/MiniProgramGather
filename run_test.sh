@@ -7,9 +7,9 @@
 # @FilePath: \MiniProgramGather\manualRun.sh
 ###
 cd /www/wwwroot/MiniProgramGather/ || exit
-# shellcheck disable=SC2009
 # shellcheck disable=SC2126
-count=$(ps -ef | grep MiniProgramGather/main.py | grep -v "grep" | wc -l)
+# shellcheck disable=SC2009
+count=$(ps -ef | grep MiniProgramGather/main_test.py | grep -v "grep" | wc -l)
 if [ 0 == "$count" ]; then
-  timeout 3600 /usr/bin/python3 /www/wwwroot/MiniProgramGather/main.py "$1"
+  timeout 30 /usr/bin/python3 /www/wwwroot/MiniProgramGather/main_test.py "$1"
 fi

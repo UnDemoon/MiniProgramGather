@@ -100,21 +100,20 @@ if __name__ == '__main__':
         RUN_TYPE = 1
     #   后台api
     houyiApi = Api()
-    #   测试
-    # info = (1, 'BgAAtGxSCrrPwKCZfMNEXsuN_R8E9KOpXezKwUH2IpF5cQ8', 3)
-    info = (4338, 'BgAAt3bl2gUxf97laJ8Nxpzbr75fBjZG5xZDnZqLm4ZgWDo', 3)
-    oneProcess(info, houyiApi)
+    # #   测试
+    # info = (4338, 'BgAAt3bl2gUxf97laJ8Nxpzbr75fBjZG5xZDnZqLm4ZgWDo', 3)
+    # oneProcess(info, houyiApi)
     #   获取后台配置
-    # confs = houyiApi.up('getMpgConf', '')
-    # for conf in confs.get('Result', {}).get('session_conf', []):
-    #     if RUN_TYPE == 2 and 1 != int(conf.get('runing', 0)):   # 手动运行
-    #         continue
-    #     conf_id = conf.get('id')
-    #     session = conf.get('session_id')
-    #     recent_days = conf.get('recent_days')
-    #     if session and recent_days:
-    #         info = (int(conf_id), session, int(recent_days))
-    #         oneProcess(info, houyiApi)
-    #     else:
-    #         logging.error('后台配置异常，conf:{0}'.format(str(conf)))
+    confs = houyiApi.up('getMpgConf', '')
+    for conf in confs.get('Result', {}).get('session_conf', []):
+        if RUN_TYPE == 2 and 1 != int(conf.get('runing', 0)):   # 手动运行
+            continue
+        conf_id = conf.get('id')
+        session = conf.get('session_id')
+        recent_days = conf.get('recent_days')
+        if session and recent_days:
+            info = (int(conf_id), session, int(recent_days))
+            oneProcess(info, houyiApi)
+        else:
+            logging.error('后台配置异常，conf:{0}'.format(str(conf)))
     print("Run End!\n")

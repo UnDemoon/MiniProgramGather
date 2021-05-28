@@ -11,5 +11,5 @@ cd /www/wwwroot/MiniProgramGather/ || exit
 # shellcheck disable=SC2126
 count=$(ps -ef | grep MiniProgramGather/main.py | grep -v "grep" | wc -l)
 if [ 0 == "$count" ]; then
-  timeout 3600 /usr/bin/python3 /www/wwwroot/MiniProgramGather/main.py "$1"
+  /usr/bin/python3 /www/wwwroot/MiniProgramGather/main.py "$1"
 fi

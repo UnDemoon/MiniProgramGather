@@ -1,7 +1,7 @@
 '''
 Author: Demoon
 Date: 2021-02-23 10:06:02
-LastEditTime: 2021-03-27 14:48:05
+LastEditTime: 2021-05-31 17:36:14
 LastEditors: Please set LastEditors
 Description: 微信小游戏数据助手爬取类
 FilePath: /MiniProgramGather/MiniProgram.py
@@ -421,7 +421,7 @@ class MiniProgramGather:
     def _formatRes(self, reqs_json_dict: dict, field_list: list, data_type: str):
         res = []
         sequence_data_list = reqs_json_dict.get('data', {}).get('sequence_data_list')
-        if isinstance(sequence_data_list, list) and len(sequence_data_list) > 0:
+        if len(sequence_data_list) > 0:
             for i in range(0, len(field_list)):
                 field_name = field_list[i]
                 point_list = sequence_data_list[i]['point_list']
@@ -452,7 +452,7 @@ class MiniProgramGather:
     def _formatResChannelGroup(self, reqs_json_dict: dict):
         res = []
         group_data_list = reqs_json_dict.get('data', {}).get('group_data_list', [])
-        if isinstance(group_data_list, list) and len(group_data_list) > 0:
+        if len(group_data_list) > 0:
             point_list = group_data_list[0]['point_list']
             for item in point_list:
                 # temp = {}
@@ -469,7 +469,7 @@ class MiniProgramGather:
     def _formatResChannel(self, reqs_json_dict: dict):
         res = []
         rank_data_list = reqs_json_dict.get('data', {}).get('rank_data_list', [])
-        if isinstance(rank_data_list, list) and len(rank_data_list) > 0:
+        if len(rank_data_list) > 0:
             stat_list = rank_data_list[0]['stat_list']
             filter_list = rank_data_list[0].get('index', {}).get('main_index', {}).get('filter_list', [])
             group_req_value = filter_list[0].get('value') if len(filter_list) > 0 else ""
@@ -488,7 +488,7 @@ class MiniProgramGather:
     def _formatResChannelData(self, reqs_json_dict: dict, field_list: list):
         res = []
         sequence_data_list = reqs_json_dict.get('data', {}).get('sequence_data_list')
-        if isinstance(sequence_data_list, list) and len(sequence_data_list) > 0:
+        if len(sequence_data_list) > 0:
             for i in range(0, len(sequence_data_list)):
                 sequence = sequence_data_list[i]
                 #   获取渠道的 wxgamecid
@@ -509,7 +509,7 @@ class MiniProgramGather:
     def _formatResAdvIncome(self, reqs_json_dict: dict, filter_list: list):
         res = []
         group_data_list = reqs_json_dict.get('data', {}).get('group_data_list')
-        if isinstance(group_data_list, list) and (len(group_data_list) > 0):
+        if (len(group_data_list) > 0):
             for i in range(0, len(group_data_list)):
                 point_list = group_data_list[i].get('point_list', [])
                 day_uix = group_data_list[i].get('index', {}).get('time_period', {}).get('start_time')

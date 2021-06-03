@@ -1,4 +1,4 @@
-'''
+"""
 @Description:
 
 @Version: 1.0
@@ -6,51 +6,48 @@
 @Date: 1970-01-01 08:00:00
 LastEditors: Please set LastEditors
 LastEditTime: 2021-03-27 15:01:06
-'''
-#  基础模块
-import sys
-import time
+"""
 import datetime
 import logging
+#  基础模块
+import sys
 import threading
-#   引入浏览器线程类#   引入api类
-from HouyiApi import HouyiApi as Api
-from MyDB import MyDB
+
 #   工具集
-import utils as myTools
 #   引入采集类
 import MiniProgramGather as MPGModel
+#   引入浏览器线程类#   引入api类
+from HouyiApi import HouyiApi as Api
 from MiniProgramGather import MiniProgramGather as MPG
-
-logging.basicConfig(filename='./_debug-log.log', level=logging.ERROR,
-                    format='%(asctime)s - %(filename)s[line:%(lineno)d] - %(levelname)s: %(message)s')
+from MyDB import MyDB
+import utils as mytools
 
 
 #   分装fuc方便进程调用
-def oneProcess(proinfo: tuple, houyiApi: object):
-    info_id, session, recent_days = proinfo
+def oneProcess(start_info: tuple, upload_api: object):
+    info_id, session_id, recent_day = start_info
     #   线程限制信号量
     thread_max = threading.BoundedSemaphore(8)
     #   根据日期构建采集时间数据
     date_today = datetime.date.today()
     end_datetime = datetime.datetime(date_today.year, date_today.month, date_today.day, 0, 0, 0)
-    start_datetime = end_datetime - datetime.timedelta(days=int(recent_days))
+    start_datetime = end_datetime - datetime.timedelta(days=int(recent_day))
     dates = (start_datetime, end_datetime)
     #   线程池
     thread_pool = []
     #   本地db
     mydb = MyDB()
     #   处理appid与app_id数据
-    app_infos = houyiApi.pageData('list_apps', None)
+    app_infos = upload_api.pageData('list_apps', None)
     app_list = app_infos.get('Result', {}).get('List', [])
     app_dict = {}
     for app in app_list:
         app_dict[app['appid']] = app['id']
     #   抓取数据
-    gl_info = MPGModel.listGames(session)
-    if gl_info['errcode'] != 0:     # 不为0 说明接口返回错误，默认是session的问题
+    gl_info = MPGModel.listGames(session_id)
+    if gl_info['errcode'] != 0:  # 不为0 说明接口返回错误，默认是session的问题
         logging.info('END - not find game list')
-        houyiApi.up('notifyMpgConf', {'run_res': 0, 'id': info_id})
+        upload_api.up('notifyMpgConf', {'run_res': 0, 'id': info_id})
     else:
         gl = gl_info['game_list']
         if len(app_dict) > 0 and len(gl) > 0:
@@ -61,7 +58,7 @@ def oneProcess(proinfo: tuple, houyiApi: object):
                     continue
                 app_info = {'appid': appid, 'app_id': app_id}
                 thread_max.acquire()
-                gather = GatherThread(session, dates, app_info, houyiApi, mydb, thread_max)
+                gather = GatherThread(session_id, dates, app_info, upload_api, mydb, thread_max)
                 thread_pool.append(gather)
                 gather.start()
                 # break
@@ -69,7 +66,7 @@ def oneProcess(proinfo: tuple, houyiApi: object):
         #   所有完成才可继续主进程
         for t in thread_pool:
             t.join()
-        houyiApi.up('notifyMpgConf', {'run_res': 1, 'id': info_id})
+        upload_api.up('notifyMpgConf', {'run_res': 1, 'id': info_id})
 
 
 # 采集线程
@@ -104,9 +101,9 @@ if __name__ == '__main__':
     # info = (4338, 'BgAAt3bl2gUxf97laJ8Nxpzbr75fBjZG5xZDnZqLm4ZgWDo', 3)
     # oneProcess(info, houyiApi)
     #   获取后台配置
-    confs = houyiApi.up('getMpgConf', '')
+    confs = houyiApi.up('getMpgConf', {})
     for conf in confs.get('Result', {}).get('session_conf', []):
-        if RUN_TYPE == 2 and 1 != int(conf.get('runing', 0)):   # 手动运行
+        if RUN_TYPE == 2 and 1 != int(conf.get('runing', 0)):  # 手动运行
             continue
         conf_id = conf.get('id')
         session = conf.get('session_id')
@@ -115,5 +112,5 @@ if __name__ == '__main__':
             info = (int(conf_id), session, int(recent_days))
             oneProcess(info, houyiApi)
         else:
-            logging.error('后台配置异常，conf:{0}'.format(str(conf)))
+            mytools.logError('后台配置异常，conf:{0}'.format(str(conf)))
     print("Run End!\n")

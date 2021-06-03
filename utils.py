@@ -1,11 +1,12 @@
-'''
+"""
 Author: your name
 Date: 2021-02-23 10:02:01
 LastEditTime: 2021-03-27 14:35:40
 LastEditors: Please set LastEditors
 Description: In User Settings Edit
 FilePath: /MiniProgramGather/utils.py
-'''
+"""
+import logging
 import os
 import random
 import time
@@ -14,18 +15,21 @@ from urllib import parse
 import datetime
 #   忽略证书警告
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
+
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
+#   log配置
+logging.basicConfig(filename='./_debug-log.log', level=logging.ERROR,
+                    format='%(asctime)s - %(filename)s[line:%(lineno)d] - %(levelname)s: %(message)s')
 
 
 #   随机间隔
-def randomSleep(limit_t: float = 0.5, max_t: float = 1.5):
+def randomSleep(limit_t: float = 0.5, max_t: float = 1.2):
     ret = random.uniform(limit_t, max_t)
     time.sleep(ret)
 
 
 #   获取开始结束日期
 def timeLag(daylag: int = 5, timetype: str = 'uix'):  # 日期间隔  类型 uix时间戳 day日期
-    res = False
     endday = datetime.date.today()
     enduix = int(time.mktime(time.strptime(str(endday), '%Y-%m-%d')))
     startday = endday - datetime.timedelta(days=daylag)  # 默认最近几天
@@ -56,7 +60,7 @@ def dateList(dateAry: tuple):
 #   dateAry (datetime, datetime)
 def dateToStamps(dateAry: tuple):
     start, end = dateAry
-    return (int(start.timestamp()), int(end.timestamp()))
+    return int(start.timestamp()), int(end.timestamp())
 
 
 #   时间戳转 date
@@ -73,8 +77,8 @@ def urlParam(url: str):
 
 
 #   _get 方法
-def moreGet(url, para, time: int = 3):
-    temp_time = time
+def moreGet(url, para, max_try: int = 3):
+    temp_time = max_try
     res = None
     while temp_time >= 0:
         randomSleep()
@@ -82,14 +86,21 @@ def moreGet(url, para, time: int = 3):
         temp_time -= 1
         if res.get('errcode') == 0:
             break
+        else:
+            logError(str(res))
     return res
 
 
 #   _get子方法
 def _subGet(url, para):
     res = {}
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:88.0) Gecko/20100101 Firefox/88.0'}
+    proxy = enumProxyPool()
+    proxies = {
+        "http": "http://%(proxy)s/" % {'proxy': proxy}
+    }
     try:
-        r = requests.get(url, params=para, verify=False)
+        r = requests.get(url, params=para, headers=headers, verify=False, proxies=proxies)
         res = r.json()
     except BaseException as e:
         print(str(e))
@@ -120,6 +131,31 @@ def filePath(file_name: str):
     path = os.path.dirname(os.path.abspath(__file__))  # 获取当前路径
     file = os.path.join(path, file_name)
     return file
+
+
+#   获取一个代理
+def enumProxyPool():
+    #   ProxyPool（https://github.com/Python3WebSpider/ProxyPool.git）项目本地地址
+    url = 'http://localhost:5555/random'
+    req = None
+    while not req:
+        req = requests.get(url)
+    return req.text
+
+
+#   数组按指定长度切割
+def listSpiltAsSize(list_data: list, size: int):
+    temp = []
+    for i in range(0, len(list_data) + 1, size):
+        part_list = list_data[i:i + size]
+        temp.append(part_list)
+    collection_list = [x for x in temp if x]
+    return collection_list
+
+
+#   报错日志
+def logError(error_info: str):
+    logging.error(error_info)
 
 
 if __name__ == '__main__':

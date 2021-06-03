@@ -5,22 +5,21 @@
 @Autor: Demoon
 @Date: 1970-01-01 08:00:00
 LastEditors: Please set LastEditors
-LastEditTime: 2021-03-27 15:01:06
+LastEditTime: 2021-06-03 11:00:11
 '''
-#  基础模块
-import sys
-import time
 import datetime
 import logging
+#  基础模块
+import sys
 import threading
-#   引入浏览器线程类#   引入api类
-from HouyiApi import HouyiApi as Api
-from MyDB import MyDB
+
 #   工具集
-import utils as myTools
 #   引入采集类
 import MiniProgramGather as MPGModel
+#   引入浏览器线程类#   引入api类
+from HouyiApi import HouyiApi as Api
 from MiniProgramGather import MiniProgramGather as MPG
+from MyDB import MyDB
 
 logging.basicConfig(filename='./_debug-log.log', level=logging.ERROR,
                     format='%(asctime)s - %(filename)s[line:%(lineno)d] - %(levelname)s: %(message)s')
@@ -48,7 +47,7 @@ def oneProcess(proinfo: tuple, houyiApi: object):
         app_dict[app['appid']] = app['id']
     #   抓取数据
     gl_info = MPGModel.listGames(session)
-    if gl_info['errcode'] != 0:     # 不为0 说明接口返回错误，默认是session的问题
+    if gl_info['errcode'] != 0:  # 不为0 说明接口返回错误，默认是session的问题
         logging.info('END - not find game list')
         houyiApi.up('notifyMpgConf', {'run_res': 0, 'id': info_id})
     else:
@@ -57,6 +56,8 @@ def oneProcess(proinfo: tuple, houyiApi: object):
             for g in gl:
                 app_id = app_dict.get(g['appid'])
                 appid = g.get('appid')
+                if appid != 'wx8ab56d2fdc8e5ec0':
+                    continue
                 if not app_id or not appid:
                     continue
                 app_info = {'appid': appid, 'app_id': app_id}
@@ -101,6 +102,6 @@ if __name__ == '__main__':
     #   后台api
     houyiApi = Api()
     # #   测试
-    info = (4338, 'BgAAuvYcJ9BEx2_OvYpEDPB-LKVr7iTQje676Q66LqYou60', 3)
+    info = (2630, 'BgAAPy7wkPiEQTa83j3ISO0lULx7QxaoQCgVpCnk93udIhw', 3)
     oneProcess(info, houyiApi)
     print("Run End!\n")

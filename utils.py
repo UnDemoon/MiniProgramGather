@@ -1,7 +1,7 @@
 '''
 Author: your name
 Date: 2021-02-23 10:02:01
-LastEditTime: 2021-03-27 14:35:40
+LastEditTime: 2021-06-03 10:41:07
 LastEditors: Please set LastEditors
 Description: In User Settings Edit
 FilePath: /MiniProgramGather/utils.py
@@ -14,11 +14,12 @@ from urllib import parse
 import datetime
 #   忽略证书警告
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
+
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 
 #   随机间隔
-def randomSleep(limit_t: float = 0.5, max_t: float = 1.5):
+def randomSleep(limit_t: float = 0.5, max_t: float = 1.2):
     ret = random.uniform(limit_t, max_t)
     time.sleep(ret)
 
@@ -73,24 +74,34 @@ def urlParam(url: str):
 
 
 #   _get 方法
-def moreGet(url, para, time: int = 3):
+def moreGet(url, para, time: int = 10):
     temp_time = time
     res = None
+    print('-\n')
     while temp_time >= 0:
         randomSleep()
         res = _subGet(url, para)
         temp_time -= 1
         if res.get('errcode') == 0:
             break
+        else:
+            print(temp_time)
     return res
 
 
 #   _get子方法
 def _subGet(url, para):
     res = {}
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:88.0) Gecko/20100101 Firefox/88.0'}
+    proxy = enumProxyPool()
+    proxies = {
+        "http": "http://%(proxy)s/" % {'proxy': proxy}
+    }
     try:
-        r = requests.get(url, params=para, verify=False)
+        r = requests.get(url, params=para, headers=headers, verify=False, proxies=proxies)
+        print(r.text)
         res = r.json()
+        print(res)
     except BaseException as e:
         print(str(e))
     return res
@@ -122,5 +133,26 @@ def filePath(file_name: str):
     return file
 
 
+#   获取一个代理
+def enumProxyPool():
+    #   ProxyPool（https://github.com/Python3WebSpider/ProxyPool.git）项目本地地址
+    url = 'http://localhost:5555/random'
+    req = None
+    while not req:
+        req = requests.get(url)
+    return req.text
+
+
+#   数组按指定长度切割
+def listSpiltAsSize(list_data: list, size: int):
+    temp = []
+    for i in range(0, len(list_data) + 1, size):
+        part_list = list_data[i:i + size]
+        temp.append(part_list)
+    newlist = [x for x in temp if x]
+    return newlist
+
+
 if __name__ == '__main__':
+    # print(enumProxyPool())
     pass

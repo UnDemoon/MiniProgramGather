@@ -1,17 +1,18 @@
 '''
 Author: Demoon
 Date: 2021-02-23 10:06:02
-LastEditTime: 2021-05-31 17:36:14
+LastEditTime: 2021-06-03 11:17:46
 LastEditors: Please set LastEditors
 Description: 微信小游戏数据助手爬取类
 FilePath: /MiniProgramGather/MiniProgram.py
 '''
-import requests
 import json
-import time
-import os
-import utils as mytools
 import logging
+import os
+
+import utils as mytools
+
+
 # import datetime
 
 
@@ -37,9 +38,9 @@ def listGames(session_id):
         #   处理数据
         get_data = reqs.get('data', {})
         res['game_list'] += map(lambda x: {
-                "appid": x['appid'],
-                "appname": x['appname']
-            }, get_data.get('app_list', []))
+            "appid": x['appid'],
+            "appname": x['appname']
+        }, get_data.get('app_list', []))
         if get_data.get('has_next'):
             #   请求数据
             data['offset'] = get_data.get('next_offset')
@@ -74,7 +75,8 @@ class MiniProgramGather:
                 with open(file_path, 'r', encoding='utf-8') as f:
                     req_conf = json.load(f)
                     #   这两个是采7留的，所以至少8天吧
-                    if (file == 'request_appdata_2.json' or file == 'request_appdata_4.json') and duration < week_duration:
+                    if (
+                            file == 'request_appdata_2.json' or file == 'request_appdata_4.json') and duration < week_duration:
                         reqdata = self._buildReqdata(req_conf['request_data'], (end_uix - week_duration, week_duration))
                     else:
                         reqdata = self._buildReqdata(req_conf['request_data'], (start_uix, duration))
@@ -94,44 +96,44 @@ class MiniProgramGather:
         dayuix_list = mytools.dateList(self.date_tuple)
         duration = 24 * 60 * 60  # 86400
         request_data = {
-                "need_app_info": True,
-                "appid": "wx544d1855bb3963d5",
-                "sequence_index_list": [
-                    {
-                        "size_type": 60,
-                        "stat_type": 1000122,
-                        "data_field_id": 5,
-                        "filter_list": [],
-                        "time_period": {
-                            "start_time": 1615132800,
-                            "duration_seconds": 86400
-                        }
-                    },
-                    {
-                        "size_type": 60,
-                        "stat_type": 1000123,
-                        "data_field_id": 4,
-                        "filter_list": [],
-                        "time_period": {
-                            "start_time": 1615132800,
-                            "duration_seconds": 86400
-                        }
-                    },
-                    {
-                        "size_type": 60,
-                        "stat_type": 1000122,
-                        "data_field_id": 4,
-                        "filter_list": [],
-                        "time_period": {
-                            "start_time": 1615132800,
-                            "duration_seconds": 86400
-                        }
+            "need_app_info": True,
+            "appid": "wx544d1855bb3963d5",
+            "sequence_index_list": [
+                {
+                    "size_type": 60,
+                    "stat_type": 1000122,
+                    "data_field_id": 5,
+                    "filter_list": [],
+                    "time_period": {
+                        "start_time": 1615132800,
+                        "duration_seconds": 86400
                     }
-                ],
-                "group_index_list": [],
-                "rank_index_list": [],
-                "version": 2
-            }
+                },
+                {
+                    "size_type": 60,
+                    "stat_type": 1000123,
+                    "data_field_id": 4,
+                    "filter_list": [],
+                    "time_period": {
+                        "start_time": 1615132800,
+                        "duration_seconds": 86400
+                    }
+                },
+                {
+                    "size_type": 60,
+                    "stat_type": 1000122,
+                    "data_field_id": 4,
+                    "filter_list": [],
+                    "time_period": {
+                        "start_time": 1615132800,
+                        "duration_seconds": 86400
+                    }
+                }
+            ],
+            "group_index_list": [],
+            "rank_index_list": [],
+            "version": 2
+        }
         for suix in dayuix_list:
             reqdata = self._buildReqdata(request_data, (suix, duration))
             reqs = warpGet(url, self.session_id, reqdata)
@@ -212,9 +214,12 @@ class MiniProgramGather:
             self._channel(group)
         #   获取该 分组下渠道
         for group in group_list:
-            channel_list = self.db.findAll("SELECT * FROM channel WHERE app_id={0} AND group_id={1}".format(self.app_info['app_id'], group[0]))
+            channel_list = self.db.findAll(
+                "SELECT * FROM channel WHERE app_id={0} AND group_id={1}".format(self.app_info['app_id'], group[0]))
             if len(channel_list) > 0:
-                self._channelData(channel_list, group)
+                #   数组太大会报错，所以要分割一下 14的原因是多次测试的最大值了，不要改
+                for temp_list in mytools.listSpiltAsSize(channel_list, 14):
+                    self._channelData(temp_list, group)
         # 上传渠道 渠道分组
         self._upChannel()
 
@@ -258,39 +263,39 @@ class MiniProgramGather:
         }
         #   注册渠道相关配置
         request_data_reg = {
-                "need_app_info": False,
-                "appid": "wxf846ea330ed135d7",
-                "rank_index_list": [
-                    {
+            "need_app_info": False,
+            "appid": "wxf846ea330ed135d7",
+            "rank_index_list": [
+                {
+                    "size_type": 24,
+                    "main_index": {
+                        "name": "来源",
+                        "stat_type": 1000091,
+                        "data_field_id": 6,
                         "size_type": 24,
-                        "main_index": {
+                        "key_field_id": 5,
+                        "filter_list": filter_list
+                    },
+                    "join_index_list": [
+                        {
                             "name": "来源",
                             "stat_type": 1000091,
                             "data_field_id": 6,
                             "size_type": 24,
                             "key_field_id": 5,
                             "filter_list": filter_list
-                        },
-                        "join_index_list": [
-                            {
-                                "name": "来源",
-                                "stat_type": 1000091,
-                                "data_field_id": 6,
-                                "size_type": 24,
-                                "key_field_id": 5,
-                                "filter_list": filter_list
-                            }
-                        ],
-                        "cur_page": 0,
-                        "per_page": 20,
-                        "time_period": {
-                            "start_time": 1614614400,
-                            "duration_seconds": 86400
                         }
+                    ],
+                    "cur_page": 0,
+                    "per_page": 20,
+                    "time_period": {
+                        "start_time": 1614614400,
+                        "duration_seconds": 86400
                     }
-                ],
-                "version": 2
-            }
+                }
+            ],
+            "version": 2
+        }
         self._channelSub(request_data_act)
         self._channelSub(request_data_reg)
 
@@ -332,24 +337,24 @@ class MiniProgramGather:
         #   field_list 和 sequence_item_conf 顺序是对应的
         sequence_item_conf = [{
             "stat_type": 1000088,
-            "data_field_id": 6,     # 活跃用户数
+            "data_field_id": 6,  # 活跃用户数
         }, {
             "stat_type": 1000088,
-            "data_field_id": 7,     # 访问次数
+            "data_field_id": 7,  # 访问次数
         }, {
-            "stat_type": 1000089,   # 活跃用户次日留存率
+            "stat_type": 1000089,  # 活跃用户次日留存率
             "data_field_id": 6,
         }, {
-            "stat_type": 1000088,   # 人均在线时长
+            "stat_type": 1000088,  # 人均在线时长
             "data_field_id": 9,
         }, {
-            "stat_type": 1000091,   # 注册用户数
+            "stat_type": 1000091,  # 注册用户数
             "data_field_id": 6,
         }, {
-            "stat_type": 1000093,   # 注册用户次日留存率
+            "stat_type": 1000093,  # 注册用户次日留存率
             "data_field_id": 6,
         }, {
-            "stat_type": 1000094,   # 累计注册用户
+            "stat_type": 1000094,  # 累计注册用户
             "data_field_id": 6,
         }]
         #   下面两个配置的数据用不着 不要了
@@ -360,7 +365,7 @@ class MiniProgramGather:
         #     "stat_type": 1000092,   # 新增付费金额
         #     "data_field_id": 7,
         # }
-        
+
         #   构建发送的数据
         sequence_index_list = []
         for channel in channel_list:
@@ -429,10 +434,11 @@ class MiniProgramGather:
                     temp = {}
                     #   根据数据类型区分处理方式
                     if data_type == "addSourceDistribution":
-                        label_value = sequence_data_list[i].get('index', {}).get('filter_list', [{}, {}])[1].get('value')
+                        label_value = sequence_data_list[i].get('index', {}).get('filter_list', [{}, {}])[1].get(
+                            'value')
                         label_name = "微信广告" if int(label_value) == 33 else "其他小程序"
                         temp['value'] = item.get('value', 0)
-                        temp['value_type'] = 1 if 'active_user' == field_name else 0   # 1-active_user 其他-new_user 配合后台
+                        temp['value_type'] = 1 if 'active_user' == field_name else 0  # 1-active_user 其他-new_user 配合后台
                         temp['day'] = item['label']
                         temp['label_value'] = label_value
                         temp['label'] = label_name
@@ -516,11 +522,11 @@ class MiniProgramGather:
                 #   获取争取的字段名
                 field_name = filter_list[i]
                 for item in point_list:
-                    if int(item.get('label_value', 0)) == 33:    # 只取微信广告，其他没用
+                    if int(item.get('label_value', 0)) == 33:  # 只取微信广告，其他没用
                         temp = {}
                         temp[field_name] = item.get('value', 0)
                         temp['day'] = mytools.unixTimeDate(int(day_uix))
-                        temp['group_value'] = 4    # 之前认定场景值 微信广告
+                        temp['group_value'] = 4  # 之前认定场景值 微信广告
                         temp['appId'] = self.app_info['appid']
                         res.append(temp)
         return res
@@ -544,7 +550,8 @@ class MiniProgramGather:
                 find_sql = "SELECT * FROM channel WHERE app_id={0} AND out_channel_id='{1}' AND name='{2}'".format(
                     item[0], item[1], item[2])
                 if not self.db.find(find_sql):
-                    find_sql = "SELECT * FROM channel_group WHERE app_id={0} AND req_value='{1}'".format(item[0], item[3])
+                    find_sql = "SELECT * FROM channel_group WHERE app_id={0} AND req_value='{1}'".format(item[0],
+                                                                                                         item[3])
                     group = self.db.find(find_sql)
                     if group:
                         filter_data.append((item[0], item[1], item[2], group[0], group[2]))
@@ -562,7 +569,7 @@ class MiniProgramGather:
             'req_value': x[1],
             'name': x[2],
             'app_id': x[3],
-            }, group_list))
+        }, group_list))
         self.api.up('addWeixinChannelGroup', data)
         #   该游戏的渠道上传
         channel_list = self.db.findAll("SELECT * FROM channel WHERE app_id={0}".format(self.app_info['app_id']))
@@ -572,5 +579,5 @@ class MiniProgramGather:
             'name': x[3],
             'group_id': x[4],
             'group_name': x[5],
-            }, channel_list))
+        }, channel_list))
         self.api.up('addWeixinChannel', data)

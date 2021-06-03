@@ -18,7 +18,7 @@ from requests.packages.urllib3.exceptions import InsecureRequestWarning
 
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 #   log配置
-logging.basicConfig(filename='./_debug-log.log', level=logging.ERROR,
+logging.basicConfig(filename=os.path.join(os.path.dirname(os.path.abspath(__file__)), '_debug-log.log'), level=logging.ERROR,
                     format='%(asctime)s - %(filename)s[line:%(lineno)d] - %(levelname)s: %(message)s')
 
 

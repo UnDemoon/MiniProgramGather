@@ -5,7 +5,7 @@
 @Autor: Demoon
 @Date: 1970-01-01 08:00:00
 LastEditors: Please set LastEditors
-LastEditTime: 2021-06-03 11:00:11
+LastEditTime: 2021-06-04 11:53:29
 '''
 import datetime
 import logging
@@ -56,8 +56,6 @@ def oneProcess(proinfo: tuple, houyiApi: object):
             for g in gl:
                 app_id = app_dict.get(g['appid'])
                 appid = g.get('appid')
-                if appid != 'wx8ab56d2fdc8e5ec0':
-                    continue
                 if not app_id or not appid:
                     continue
                 app_info = {'appid': appid, 'app_id': app_id}

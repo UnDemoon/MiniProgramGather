@@ -1,7 +1,7 @@
 '''
 Author: your name
 Date: 2021-02-23 10:02:01
-LastEditTime: 2021-06-03 10:41:07
+LastEditTime: 2021-06-04 13:41:11
 LastEditors: Please set LastEditors
 Description: In User Settings Edit
 FilePath: /MiniProgramGather/utils.py
@@ -74,7 +74,7 @@ def urlParam(url: str):
 
 
 #   _get 方法
-def moreGet(url, para, time: int = 10):
+def moreGet(url, para, time: int = 3):
     temp_time = time
     res = None
     print('-\n')
@@ -95,7 +95,7 @@ def _subGet(url, para):
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:88.0) Gecko/20100101 Firefox/88.0'}
     proxy = enumProxyPool()
     proxies = {
-        "http": "http://%(proxy)s/" % {'proxy': proxy}
+        "http": "http://%(proxy)s" % {'proxy': proxy}
     }
     try:
         r = requests.get(url, params=para, headers=headers, verify=False, proxies=proxies)

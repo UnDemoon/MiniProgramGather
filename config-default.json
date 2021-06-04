@@ -1,5 +1,5 @@
 {
-  "upload_host": "http://test.api.biz.hnquyou.com",
+  "upload_host": "http://api.biz.hnquyou.com",
   "instructions": "头条账号采集时间有点长！！",
   "account_list": []
 }

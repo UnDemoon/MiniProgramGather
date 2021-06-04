@@ -18,12 +18,13 @@ from requests.packages.urllib3.exceptions import InsecureRequestWarning
 
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 #   log配置
-logging.basicConfig(filename=os.path.join(os.path.dirname(os.path.abspath(__file__)), '_debug-log.log'), level=logging.ERROR,
+logging.basicConfig(filename=os.path.join(os.path.dirname(os.path.abspath(__file__)), '_debug-log.log'),
+                    level=logging.ERROR,
                     format='%(asctime)s - %(filename)s[line:%(lineno)d] - %(levelname)s: %(message)s')
 
 
 #   随机间隔
-def randomSleep(limit_t: float = 0.5, max_t: float = 1.2):
+def randomSleep(limit_t: float = 0.8, max_t: float = 2.6):
     ret = random.uniform(limit_t, max_t)
     time.sleep(ret)
 
@@ -77,7 +78,7 @@ def urlParam(url: str):
 
 
 #   _get 方法
-def moreGet(url, para, max_try: int = 3):
+def moreGet(url, para, max_try: int = 5):
     temp_time = max_try
     res = None
     while temp_time >= 0:
@@ -86,8 +87,9 @@ def moreGet(url, para, max_try: int = 3):
         temp_time -= 1
         if res.get('errcode') == 0:
             break
-        else:
-            logError(str(res))
+    #   循环之后还报错才算错
+    if res.get('errcode') != 0:
+        logError(str(res))
     return res
 
 

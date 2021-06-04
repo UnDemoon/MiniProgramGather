@@ -6,6 +6,8 @@
 # @Description: In User Settings Edit
 # @FilePath: \MiniProgramGather\manualRun.sh
 ###
+# shellcheck disable=SC2009
+ps aux | grep "MiniProgramGather/main.py" | grep -v grep | awk '{print $2}' | xargs kill -9
 cd /www/wwwroot/MiniProgramGather/ || exit
 # shellcheck disable=SC2009
 # shellcheck disable=SC2126

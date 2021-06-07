@@ -17,9 +17,10 @@ import utils as mytools
 
 
 def warpGet(url, session_id, data):
+    appid = data.get('appid', '')
     data = json.dumps(data)
     params = {"session_id": session_id, "data": data}
-    res = mytools.moreGet(url, params)
+    res = mytools.moreGet(url, params, appid)
     return res
 
 

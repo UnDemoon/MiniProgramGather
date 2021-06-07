@@ -78,7 +78,8 @@ def urlParam(url: str):
 
 
 #   _get 方法
-def moreGet(url, para, max_try: int = 5):
+def moreGet(url, para, appid, max_try: int = 5):
+    print('-')
     temp_time = max_try
     res = None
     while temp_time >= 0:
@@ -89,7 +90,12 @@ def moreGet(url, para, max_try: int = 5):
             break
     #   循环之后还报错才算错
     if res.get('errcode') != 0:
-        logError(str(res))
+        errorinfo = {
+            'session_id': para.get('session_id', ''),
+            'appid': appid,
+            'error_info': str(res)
+        }
+        logError(str(errorinfo))
     return res
 
 

@@ -1,11 +1,11 @@
-'''
+"""
 Author: Demoon
 Date: 2021-02-23 10:06:02
 LastEditTime: 2021-03-27 14:48:05
 LastEditors: Please set LastEditors
 Description: 微信小游戏数据助手爬取类
 FilePath: /MiniProgramGather/MiniProgram.py
-'''
+"""
 import json
 import logging
 import os
@@ -13,52 +13,59 @@ import os
 import utils as mytools
 
 
-# import datetime
-
-
-def warpGet(url, session_id, data):
-    appid = data.get('appid', '')
-    data = json.dumps(data)
-    params = {"session_id": session_id, "data": data}
-    res = mytools.moreGet(url, params, appid)
-    return res
-
-
-#   获取游戏列表
-def listGames(session_id):
-    res = {
-        'errcode': '',
-        'game_list': []
-    }
-    url = "https://game.weixin.qq.com/cgi-bin/gamewxagdatawap/getwxagapplist"
-    data = {"offset": "0", "limit": 20}
-    while True:
-        #   请求数据
-        reqs = warpGet(url, session_id, data)
-        res['errcode'] = reqs.get('errcode', 0)
-        #   处理数据
-        get_data = reqs.get('data', {})
-        res['game_list'] += map(lambda x: {
-            "appid": x['appid'],
-            "appname": x['appname']
-        }, get_data.get('app_list', []))
-        if get_data.get('has_next'):
-            #   请求数据
-            data['offset'] = get_data.get('next_offset')
-        else:
-            break
-    return res
-
-
 #   单个游戏采集类
 class MiniProgramGather:
     def __init__(self, session_id: str, dates: tuple, app_info: dict,
-                 houyiApi: object, mydb: object):
+                 houyi_api: object, mydb: object, signal: object):
         self.session_id = session_id
         self.date_tuple = dates
         self.app_info = app_info
-        self.api = houyiApi
+        self.api = houyi_api
         self.db = mydb
+        self.signal = signal
+
+    #   获取游戏列表 静态方法
+    @staticmethod
+    def listGames(session_id):
+        res = {
+            'errcode': '',
+            'game_list': []
+        }
+        url = "https://game.weixin.qq.com/cgi-bin/gamewxagdatawap/getwxagapplist"
+        data = {"offset": "0", "limit": 20}
+        while True:
+            #   请求数据
+            reqs = MiniProgramGather.staticWarpGet(url, session_id, data)
+            res['errcode'] = reqs.get('errcode', 0)
+            #   处理数据
+            get_data = reqs.get('data', {})
+            res['game_list'] += map(lambda x: {
+                "appid": x['appid'],
+                "appname": x['appname']
+            }, get_data.get('app_list', []))
+            if get_data.get('has_next'):
+                #   请求数据
+                data['offset'] = get_data.get('next_offset')
+            else:
+                break
+        return res
+
+    #   静态请求
+    @staticmethod
+    def staticWarpGet(url, session_id, data):
+        appid = data.get('appid', '')
+        data = json.dumps(data)
+        params = {"session_id": session_id, "data": data}
+        res = mytools.moreGet(url, params, appid)
+        return res
+
+    #   get方法
+    def warpGet(self, url, session_id, data):
+        appid = data.get('appid', '')
+        data = json.dumps(data)
+        params = {"session_id": session_id, "data": data}
+        res = mytools.moreGet(url, params, appid, self.signal)
+        return res
 
     #   运行采集
     #   遍历 reqdata 下配置文件依次获取数据并发送
@@ -69,7 +76,7 @@ class MiniProgramGather:
         duration = end_uix - start_uix
         week_duration = 8 * 24 * 60 * 60
         url = "https://game.weixin.qq.com/cgi-bin/gamewxagbdatawap/getwxagstat"
-        path = mytools.filePath("./reqdata/")
+        path = mytools.filePath("reqdata\\")
         for root, dirs, files in os.walk(path):
             for file in files:
                 file_path = os.path.join(root, file)
@@ -81,7 +88,7 @@ class MiniProgramGather:
                         reqdata = self._buildReqdata(req_conf['request_data'], (end_uix - week_duration, week_duration))
                     else:
                         reqdata = self._buildReqdata(req_conf['request_data'], (start_uix, duration))
-                    reqs = warpGet(url, self.session_id, reqdata)
+                    reqs = self.warpGet(url, self.session_id, reqdata)
                     data = self._formatRes(reqs, req_conf['field_name_list'], req_conf['api_interface'])
                     self.api.up(req_conf['api_interface'], data)
         #   渠道相关特殊采集
@@ -137,7 +144,7 @@ class MiniProgramGather:
         }
         for suix in dayuix_list:
             reqdata = self._buildReqdata(request_data, (suix, duration))
-            reqs = warpGet(url, self.session_id, reqdata)
+            reqs = self.warpGet(url, self.session_id, reqdata)
             data = self._formatRes(reqs, ['visit_user', 'reg_user', 'visit_times'], "addTimeData")
             self.api.up('addTimeData', data)
 
@@ -175,7 +182,7 @@ class MiniProgramGather:
         }
         for suix in dayuix_list:
             reqdata = self._buildReqdata(request_data, (suix, duration))
-            reqs = warpGet(url, self.session_id, reqdata)
+            reqs = self.warpGet(url, self.session_id, reqdata)
             data = self._formatResAdvIncome(reqs, ['income'])
             self.api.up('addStatement', data)
 
@@ -206,7 +213,7 @@ class MiniProgramGather:
         }
         for suix in dayuix_list:
             reqdata = self._buildReqdata(request_data, (suix, duration))
-            reqs = warpGet(url, self.session_id, reqdata)
+            reqs = self.warpGet(url, self.session_id, reqdata)
             data = self._formatResChannelGroup(reqs)
             self.saveToDb('channel_group', data)
         #   获取该 app_id 下分组
@@ -311,7 +318,7 @@ class MiniProgramGather:
         #   请求阶段
         while True:
             reqdata = self._buildReqdata(request_data, (end_uix, duration))
-            reqs = warpGet(url, self.session_id, reqdata)
+            reqs = self.warpGet(url, self.session_id, reqdata)
             next_page = reqs.get('data', {}).get('rank_data_list', [{}])[0].get("next_page")
             has_next = reqs.get('data', {}).get('rank_data_list', [{}])[0].get("has_next", False)
             data += self._formatResChannel(reqs)
@@ -402,7 +409,7 @@ class MiniProgramGather:
             "version": 2
         }
         reqdata = self._buildReqdata(request_data, (start_uix, duration))
-        reqs = warpGet(url, self.session_id, reqdata)
+        reqs = self.warpGet(url, self.session_id, reqdata)
         data = self._formatResChannelData(reqs, field_list)
         self.api.up('addWeixinChannelData', data)
 

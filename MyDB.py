@@ -1,19 +1,19 @@
-'''
+"""
 Author: Demoon
 Date: 2021-03-02 09:55:45
 LastEditTime: 2021-03-12 17:51:56
 LastEditors: Please set LastEditors
 Description: 运营 sqlite3 的本地存储系统
 FilePath: \\MiniProgramGather\\MyDB.py
-'''
+"""
 import sqlite3
 import logging
-import utils as myTools
+import utils as mytools
 
 
 class MyDB:
     def __init__(self, db_file='mpg.sqlite3.db'):
-        file = myTools.filePath(db_file)
+        file = mytools.filePath(db_file)
         self.conn = sqlite3.connect(file, check_same_thread=False)
 
     #   运行sql语句 无返回类

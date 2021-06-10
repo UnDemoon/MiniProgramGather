@@ -9,6 +9,7 @@ FilePath: /MiniProgramGather/utils.py
 import logging
 import os
 import random
+import sys
 import time
 import requests
 from urllib import parse
@@ -18,7 +19,7 @@ from requests.packages.urllib3.exceptions import InsecureRequestWarning
 
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 #   log配置
-logging.basicConfig(filename=os.path.join(os.path.dirname(os.path.abspath(__file__)), '_debug-log.log'),
+logging.basicConfig(filename='_debug-log.log',
                     level=logging.ERROR,
                     format='%(asctime)s - %(filename)s[line:%(lineno)d] - %(levelname)s: %(message)s')
 
@@ -78,8 +79,9 @@ def urlParam(url: str):
 
 
 #   _get 方法
-def moreGet(url, para, appid, max_try: int = 5):
-    print('-')
+def moreGet(url, para, appid, signal=None, max_try: int = 5):
+    if signal:
+        signal.log_info.emit(random.choice(['-', '+', '@', '#', '$', '%', '&', '*', '^', '~', '/', '?', '<', '>']))
     temp_time = max_try
     res = None
     while temp_time >= 0:
@@ -95,7 +97,8 @@ def moreGet(url, para, appid, max_try: int = 5):
             'appid': appid,
             'error_info': str(res)
         }
-        logError(str(errorinfo))
+        if signal:
+            signal.log_info.emit(str(errorinfo))
     return res
 
 
@@ -136,7 +139,8 @@ def writeToFile(file_path: str, data_str: str):
 
 #   文件的路径
 def filePath(file_name: str):
-    path = os.path.dirname(os.path.abspath(__file__))  # 获取当前路径
+    # path = os.path.dirname(os.path.abspath(__file__))  # 获取当前路径
+    path = os.path.dirname(os.path.realpath(sys.executable))
     file = os.path.join(path, file_name)
     return file
 
@@ -144,7 +148,7 @@ def filePath(file_name: str):
 #   获取一个代理
 def enumProxyPool():
     #   ProxyPool（https://github.com/Python3WebSpider/ProxyPool.git）项目本地地址
-    url = 'http://localhost:5555/random'
+    url = 'http://120.55.100.149/random'
     req = None
     while not req:
         req = requests.get(url)

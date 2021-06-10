@@ -15,6 +15,6 @@ if __name__ == '__main__':
             'MyDb.py',
             '-F',
             '-w',
-        #     '-D',
+            # '-D',
             '--icon=Dig Dug.ico']
     run(opts)
